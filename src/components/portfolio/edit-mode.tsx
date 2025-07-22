@@ -61,13 +61,11 @@ export function EditMode({ children, userId, initialData }: EditModeProps) {
                   
                   <LinksEditor 
                     links={data.links}
-                    userId={userId}
                     onUpdate={(updatedLinks: UserLink[]) => setData(prev => ({ ...prev, links: updatedLinks }))}
                   />
                   
                   <ProjectsEditor 
                     projects={data.projects}
-                    userId={userId}
                     onUpdate={(updatedProjects: Project[]) => setData(prev => ({ ...prev, projects: updatedProjects }))}
                   />
                 </div>

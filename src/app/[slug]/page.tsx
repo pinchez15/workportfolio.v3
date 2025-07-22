@@ -12,7 +12,7 @@ import { ProjectFilter } from "@/components/project-filter"
 import { EditMode } from "@/components/portfolio/edit-mode"
 import { ProjectCard } from "@/components/portfolio/project-card"
 import { createServerComponentClient } from "@/lib/supabase"
-import { User, Project, Link as UserLink } from "@/types/database"
+
 
 interface PortfolioPageProps {
   params: Promise<{
@@ -35,7 +35,7 @@ async function getPortfolioData(slug: string) {
   }
 
   // Get user's projects
-  const { data: projects, error: projectsError } = await supabase
+  const { data: projects } = await supabase
     .from('projects')
     .select('*')
     .eq('user_id', user.id)
@@ -43,7 +43,7 @@ async function getPortfolioData(slug: string) {
     .order('created_at', { ascending: false });
 
   // Get user's links
-  const { data: links, error: linksError } = await supabase
+  const { data: links } = await supabase
     .from('links')
     .select('*')
     .eq('user_id', user.id)

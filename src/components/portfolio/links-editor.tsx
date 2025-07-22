@@ -15,11 +15,10 @@ import { Link as UserLink } from "@/types/database"
 
 interface LinksEditorProps {
   links: UserLink[]
-  userId: string
   onUpdate: (updatedLinks: UserLink[]) => void
 }
 
-export function LinksEditor({ links, userId, onUpdate }: LinksEditorProps) {
+export function LinksEditor({ links, onUpdate }: LinksEditorProps) {
   const { user: clerkUser } = useUser()
   const [isLoading, setIsLoading] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -114,7 +113,7 @@ export function LinksEditor({ links, userId, onUpdate }: LinksEditorProps) {
         visible: true,
         show_preview: false
       })
-    } catch (error) {
+    } catch {
               // Error saving link
       toast.error("Failed to save link")
     } finally {

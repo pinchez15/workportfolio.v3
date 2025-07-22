@@ -60,7 +60,7 @@ export function HeaderEditor({ user, onUpdate }: HeaderEditorProps) {
 
       onUpdate({ ...user, avatar_url: publicUrl })
       toast.success("Avatar updated successfully!")
-    } catch (error) {
+    } catch {
               // Error uploading avatar
       toast.error("Failed to upload avatar")
     } finally {
@@ -86,7 +86,7 @@ export function HeaderEditor({ user, onUpdate }: HeaderEditorProps) {
 
       onUpdate({ ...user, ...formData })
       toast.success("Profile updated successfully!")
-    } catch (error) {
+    } catch {
               // Error updating profile
       toast.error("Failed to update profile")
     } finally {

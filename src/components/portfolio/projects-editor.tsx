@@ -15,11 +15,10 @@ import { Project } from "@/types/database"
 
 interface ProjectsEditorProps {
   projects: Project[]
-  userId: string
   onUpdate: (updatedProjects: Project[]) => void
 }
 
-export function ProjectsEditor({ projects, userId, onUpdate }: ProjectsEditorProps) {
+export function ProjectsEditor({ projects, onUpdate }: ProjectsEditorProps) {
   const { user: clerkUser } = useUser()
   const [isLoading, setIsLoading] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -75,7 +74,7 @@ export function ProjectsEditor({ projects, userId, onUpdate }: ProjectsEditorPro
       setFormData(prev => ({ ...prev, image_paths: allImages }))
       
       toast.success(`${fileArray.length} image(s) uploaded successfully!`)
-    } catch (error) {
+    } catch {
               // Error uploading images
       toast.error("Failed to upload images")
     } finally {
@@ -149,7 +148,7 @@ export function ProjectsEditor({ projects, userId, onUpdate }: ProjectsEditorPro
         visible: true
       })
       setUploadedImages([])
-    } catch (error) {
+    } catch {
               // Error saving project
       toast.error("Failed to save project")
     } finally {
@@ -172,7 +171,7 @@ export function ProjectsEditor({ projects, userId, onUpdate }: ProjectsEditorPro
       const updatedProjects = projects.filter(project => project.id !== projectId)
       onUpdate(updatedProjects)
       toast.success("Project deleted successfully!")
-    } catch (error) {
+    } catch {
               // Error deleting project
       toast.error("Failed to delete project")
     } finally {

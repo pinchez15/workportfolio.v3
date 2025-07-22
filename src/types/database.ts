@@ -23,7 +23,7 @@ export interface Project {
   start_date?: string;
   end_date?: string;
   url?: string;
-  image_path?: string;
+  image_path: string | null;
   image_paths?: string[];
   tags?: string[];
   skills?: string[];
