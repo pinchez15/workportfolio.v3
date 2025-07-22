@@ -44,10 +44,10 @@ export default function HomePage() {
             <h1 className="text-5xl lg:text-[56px] font-black text-neutral-900 mb-6">
               Don&apos;t tell. <span className="text-blue-600">Show.</span>
             </h1>
-            <p className="text-xl text-gray-600 leading-snug max-w-lg mb-8">
+            <p className="text-xl text-gray-700 leading-snug max-w-xl mb-8">
               You do great work. You just need a simple, beautiful way to show it off.
             </p>
-            <ul className="text-left space-y-2 text-sm text-gray-800 mb-8">
+            <ul className="text-left space-y-2 text-base text-gray-700 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 mr-2">●</span>
                 Portfolios live in under 5 minutes
@@ -117,11 +117,10 @@ export default function HomePage() {
                       </Button>
                     </div>
                   </div>
+                  <p className="text-xs text-gray-500 mt-4">Built in 4 minutes</p>
                 </CardContent>
               </Card>
-              <div className="absolute -bottom-2 -left-2">
-                <span className="rounded-lg px-3 py-1 bg-white shadow text-sm text-gray-500">Built in 4 minutes</span>
-              </div>
+
             </div>
           </div>
         </div>
