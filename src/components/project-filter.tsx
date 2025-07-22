@@ -34,7 +34,7 @@ export function ProjectFilter({ projects, skills }: ProjectFilterProps) {
   return (
     <div>
       <div className="mb-6">
-        <h2 className="mb-4 text-2xl font-bold">Projects</h2>
+        <h2 className="mb-4 text-2xl font-black text-neutral-900">Projects</h2>
         <div className="flex flex-wrap gap-2">
           <Badge
             variant={selectedSkill === "all" ? "default" : "secondary"}

@@ -37,42 +37,42 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 pt-24 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
+            <div className="max-w-xl">
               <p className="text-blue-600 font-medium mb-6 tracking-wide">FOR PROFESSIONALS WHO MOVE FAST</p>
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+              <h1 className="text-5xl font-black text-neutral-900 mb-6">
                 Don&apos;t tell. <span className="text-blue-600">Show.</span>
               </h1>
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              <p className="text-xl text-gray-700 leading-snug max-w-xl mb-8">
                 You do great work. You just need a simple, beautiful way to show it off.
               </p>
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center">
-                  <Check className="w-5 h-5 text-green-500 mr-3" />
-                  <span className="text-gray-700">Portfolios live in under 5 minutes</span>
-                </div>
-                <div className="flex items-center">
-                  <Check className="w-5 h-5 text-green-500 mr-3" />
-                  <span className="text-gray-700">No domains. No design decisions.</span>
-                </div>
-                <div className="flex items-center">
-                  <Check className="w-5 h-5 text-green-500 mr-3" />
-                  <span className="text-gray-700">Perfect for LinkedIn, resumes, cold outreach</span>
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <ul className="text-left space-y-2 text-base text-gray-700 mb-8">
+                <li className="flex items-start">
+                  <span className="text-green-500 mr-2 mt-1">●</span>
+                  Portfolios live in under 5 minutes
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-500 mr-2 mt-1">●</span>
+                  No domains. No design decisions.
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-500 mr-2 mt-1">●</span>
+                  Perfect for LinkedIn, resumes, cold outreach
+                </li>
+              </ul>
+              <div className="flex flex-wrap gap-4 mt-6">
                 <Link href="/portfolio">
-                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-                    Create Your Free Portfolio
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow">
+                    Create Your Free Portfolio →
                   </Button>
                 </Link>
-                <Button variant="outline" size="lg">
+                <Button variant="outline" size="lg" className="bg-white hover:bg-gray-100 border border-gray-300 text-gray-800 font-semibold px-6 py-3 rounded-lg">
                   View Live Example
                 </Button>
               </div>
+              <p className="text-sm text-gray-500 mt-4">Built in under 5 minutes</p>
             </div>
             <div className="relative">
               <Card className="bg-white shadow-lg">
@@ -129,6 +129,80 @@ export default function HomePage() {
         </div>
       </section>
 
+{/* Problem Section */}
+<section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            <div>
+              <p className="text-red-600 font-medium mb-4 tracking-wide">THE PROBLEM</p>
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                Traditional platforms make it <span className="text-red-600 italic">way too hard</span>
+              </h2>
+
+              <Card className="mt-8">
+                <CardHeader>
+                  <CardTitle className="text-gray-900">The Old Way: Hours of Setup</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-gray-700">Buy domain ($15/year)</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-gray-700">Choose hosting ($10/month)</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-gray-700">Design layout (6+ hours)</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-gray-700">Write content (3+ hours)</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-gray-700">Hope it works on mobile</span>
+                  </div>
+                  <div className="border-t pt-4 mt-4">
+                    <div className="bg-red-50 p-3 rounded text-center">
+                      <span className="font-bold text-red-700">Total: 10+ hours, $120+/year</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Website builders take forever</h3>
+                <p className="text-gray-600">
+                  Website builders like Wix take too long. You need a domain, theme, and time you don&apos;t have. Most
+                  professionals give up halfway through or launch something that looks amateur.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Your work gets buried in text</h3>
+                <p className="text-gray-600">
+                                  LinkedIn posts get lost in feeds. Resumes hide your best work in bullet points. Email signatures can&apos;t
+                show screenshots. You&apos;re tired of <em>describing</em> what you&apos;ve built.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Good work should speak for itself</h3>
+                <p className="text-gray-600 mb-4">
+                  If your work speaks for itself, <em>why is it so hard to show it?</em> You shouldn&apos;t need to be a web
+                  designer to showcase your actual skills.
+                </p>
+
+                <div className="border-l-4 border-red-500 pl-6 bg-red-50 p-4">
+                  <p className="font-bold text-gray-900 mb-2">
+                    Don&apos;t let your best work get lost in resumes and long bios.
+                  </p>
+                  <p className="text-gray-700">Stop explaining—start showing.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       {/* Features Section */}
       <section id="features" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -215,80 +289,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Problem Section */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            <div>
-              <p className="text-red-600 font-medium mb-4 tracking-wide">THE PROBLEM</p>
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                Traditional platforms make it <span className="text-red-600 italic">way too hard</span>
-              </h2>
-
-              <Card className="mt-8">
-                <CardHeader>
-                  <CardTitle className="text-gray-900">The Old Way: Hours of Setup</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between py-2">
-                    <span className="text-gray-700">Buy domain ($15/year)</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2">
-                    <span className="text-gray-700">Choose hosting ($10/month)</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2">
-                    <span className="text-gray-700">Design layout (6+ hours)</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2">
-                    <span className="text-gray-700">Write content (3+ hours)</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2">
-                    <span className="text-gray-700">Hope it works on mobile</span>
-                  </div>
-                  <div className="border-t pt-4 mt-4">
-                    <div className="bg-red-50 p-3 rounded text-center">
-                      <span className="font-bold text-red-700">Total: 10+ hours, $120+/year</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="space-y-8">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Website builders take forever</h3>
-                <p className="text-gray-600">
-                  Website builders like Wix take too long. You need a domain, theme, and time you don&apos;t have. Most
-                  professionals give up halfway through or launch something that looks amateur.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Your work gets buried in text</h3>
-                <p className="text-gray-600">
-                                  LinkedIn posts get lost in feeds. Resumes hide your best work in bullet points. Email signatures can&apos;t
-                show screenshots. You&apos;re tired of <em>describing</em> what you&apos;ve built.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Good work should speak for itself</h3>
-                <p className="text-gray-600 mb-4">
-                  If your work speaks for itself, <em>why is it so hard to show it?</em> You shouldn&apos;t need to be a web
-                  designer to showcase your actual skills.
-                </p>
-
-                <div className="border-l-4 border-red-500 pl-6 bg-red-50 p-4">
-                  <p className="font-bold text-gray-900 mb-2">
-                    Don&apos;t let your best work get lost in resumes and long bios.
-                  </p>
-                  <p className="text-gray-700">Stop explaining—start showing.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       {/* How It Works Section */}
       <section className="py-20 bg-gray-50">

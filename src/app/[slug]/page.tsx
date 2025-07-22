@@ -204,9 +204,9 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
                 priority
               />
             </div>
-            <h1 className="mt-4 text-3xl font-bold">{user.name || user.username}</h1>
-            <p className="text-primary">{user.title}</p>
-            <p className="mt-2 max-w-lg text-muted-foreground">{user.bio}</p>
+            <h1 className="mt-4 text-4xl font-black text-neutral-900">{user.name || user.username}</h1>
+            <p className="text-xl text-blue-600 font-semibold">{user.title}</p>
+            <p className="mt-2 max-w-xl text-gray-700 leading-snug">{user.bio}</p>
 
             <div className="mt-4 flex gap-2">
               {user.social_links?.linkedin && (
@@ -232,7 +232,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
 
           {transformedLinks.length > 0 && (
             <section className="mt-8">
-              <h2 className="mb-4 text-2xl font-bold">Links</h2>
+              <h2 className="mb-6 text-3xl font-black text-neutral-900">Links</h2>
               <div className="flex flex-col gap-3">
                 {transformedLinks.map((link, index) => (
                   <a
@@ -262,6 +262,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
 
           {transformedProjects.length > 0 && (
             <section className="mt-12">
+              <h2 className="mb-6 text-3xl font-black text-neutral-900">Projects</h2>
               <ProjectFilter projects={transformedProjects} skills={allSkills} />
             </section>
           )}

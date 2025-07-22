@@ -14,11 +14,11 @@ export default function PrivacyPage() {
       </nav>
 
       <main className="container mx-auto px-4 py-12 max-w-4xl">
-        <h1 className="text-4xl font-bold text-slate-900 mb-8">Privacy Policy</h1>
+        <h1 className="text-4xl font-black text-neutral-900 mb-8">Privacy Policy</h1>
         
         <div className="bg-white rounded-lg shadow-lg p-8 space-y-6">
           <section>
-            <h2 className="text-2xl font-semibold mb-4">Information We Collect</h2>
+            <h2 className="text-2xl font-black text-neutral-900 mb-4">Information We Collect</h2>
             <p className="text-slate-600 mb-4">
               We collect information you provide directly to us, such as when you create an account, 
               upload content, or contact us for support.
@@ -32,7 +32,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4">How We Use Your Information</h2>
+            <h2 className="text-2xl font-black text-neutral-900 mb-4">How We Use Your Information</h2>
             <p className="text-slate-600 mb-4">
               We use the information we collect to provide, maintain, and improve our services:
             </p>
@@ -46,7 +46,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4">Information Sharing</h2>
+            <h2 className="text-2xl font-black text-neutral-900 mb-4">Information Sharing</h2>
             <p className="text-slate-600">
               We do not sell, trade, or otherwise transfer your personal information to third parties 
               without your consent, except as described in this policy or as required by law.
@@ -54,7 +54,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4">Data Security</h2>
+            <h2 className="text-2xl font-black text-neutral-900 mb-4">Data Security</h2>
             <p className="text-slate-600">
               We implement appropriate security measures to protect your personal information against 
               unauthorized access, alteration, disclosure, or destruction.
@@ -62,7 +62,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4">Your Rights</h2>
+            <h2 className="text-2xl font-black text-neutral-900 mb-4">Your Rights</h2>
             <p className="text-slate-600 mb-4">
               You have the right to:
             </p>
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
+            <h2 className="text-2xl font-black text-neutral-900 mb-4">Contact Us</h2>
             <p className="text-slate-600">
               If you have any questions about this Privacy Policy, please contact us at{' '}
               <a href="mailto:privacy@workportfolio.io" className="text-blue-600 hover:underline">
@@ -85,7 +85,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4">Updates to This Policy</h2>
+            <h2 className="text-2xl font-black text-neutral-900 mb-4">Updates to This Policy</h2>
             <p className="text-slate-600">
               We may update this Privacy Policy from time to time. We will notify you of any changes 
               by posting the new Privacy Policy on this page and updating the &quot;Last Updated&quot; date.
