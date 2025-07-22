@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { createClientComponentClient } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { Link as UserLink } from "@/types/database"
 
@@ -32,7 +32,7 @@ export function LinksEditor({ links, onUpdate }: LinksEditorProps) {
     show_preview: false
   })
 
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const normalizeUrl = (url: string): string => {
     if (!url) return ""
@@ -136,7 +136,7 @@ export function LinksEditor({ links, onUpdate }: LinksEditorProps) {
       const updatedLinks = links.filter(link => link.id !== linkId)
       onUpdate(updatedLinks)
       toast.success("Link deleted successfully!")
-    } catch (error) {
+    } catch {
               // Error deleting link
       toast.error("Failed to delete link")
     } finally {

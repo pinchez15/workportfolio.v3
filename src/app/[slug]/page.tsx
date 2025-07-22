@@ -11,7 +11,8 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { ProjectFilter } from "@/components/project-filter"
 import { EditMode } from "@/components/portfolio/edit-mode"
 import { ProjectCard } from "@/components/portfolio/project-card"
-import { createServerComponentClient } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/server"
+import { cookies } from "next/headers"
 
 
 interface PortfolioPageProps {
@@ -21,7 +22,8 @@ interface PortfolioPageProps {
 }
 
 async function getPortfolioData(slug: string) {
-  const supabase = createServerComponentClient();
+  const cookieStore = cookies();
+  const supabase = await createClient(cookieStore);
   
   // Get user by username (slug)
   const { data: user, error: userError } = await supabase

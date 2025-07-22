@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { createClientComponentClient } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { Project } from "@/types/database"
 
@@ -37,7 +37,7 @@ export function ProjectsEditor({ projects, onUpdate }: ProjectsEditorProps) {
   })
   const [uploadedImages, setUploadedImages] = useState<string[]>([])
 
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const handleImageUpload = async (files: FileList) => {
     if (!clerkUser) return
