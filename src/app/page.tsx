@@ -37,46 +37,43 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-16 pt-24 pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="max-w-xl">
-              <p className="text-blue-600 font-medium mb-6 tracking-wide">FOR PROFESSIONALS WHO MOVE FAST</p>
-              <h1 className="text-5xl font-black text-neutral-900 mb-6">
-                Don&apos;t tell. <span className="text-blue-600">Show.</span>
-              </h1>
-              <p className="text-xl text-gray-700 leading-snug max-w-xl mb-8">
-                You do great work. You just need a simple, beautiful way to show it off.
-              </p>
-              <ul className="text-left space-y-2 text-base text-gray-700 mb-8">
-                <li className="flex items-start">
-                  <span className="text-green-500 mr-2 mt-1">●</span>
-                  Portfolios live in under 5 minutes
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 mr-2 mt-1">●</span>
-                  No domains. No design decisions.
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 mr-2 mt-1">●</span>
-                  Perfect for LinkedIn, resumes, cold outreach
-                </li>
-              </ul>
-              <div className="flex flex-wrap gap-4 mt-6">
-                <Link href="/portfolio">
-                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow">
-                    Create Your Free Portfolio →
-                  </Button>
-                </Link>
-                <Button variant="outline" size="lg" className="bg-white hover:bg-gray-100 border border-gray-300 text-gray-800 font-semibold px-6 py-3 rounded-lg">
-                  View Live Example
+      <section className="py-24 lg:py-32 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between">
+          <div className="max-w-xl">
+            <p className="text-blue-600 font-medium mb-6 tracking-wide">FOR PROFESSIONALS WHO MOVE FAST</p>
+            <h1 className="text-5xl lg:text-[56px] font-black text-neutral-900 mb-6">
+              Don&apos;t tell. <span className="text-blue-600">Show.</span>
+            </h1>
+            <p className="text-xl text-gray-600 leading-snug max-w-lg mb-8">
+              You do great work. You just need a simple, beautiful way to show it off.
+            </p>
+            <ul className="text-left space-y-2 text-sm text-gray-800 mb-8">
+              <li className="flex items-start">
+                <span className="text-green-500 mr-2">●</span>
+                Portfolios live in under 5 minutes
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 mr-2">●</span>
+                No domains. No design decisions.
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 mr-2">●</span>
+                Perfect for LinkedIn, resumes, cold outreach
+              </li>
+            </ul>
+            <div className="flex flex-wrap gap-4 mt-8">
+              <Link href="/portfolio">
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow">
+                  Create Your Free Portfolio →
                 </Button>
-              </div>
-              <p className="text-sm text-gray-500 mt-4">Built in under 5 minutes</p>
+              </Link>
+              <Button variant="outline" size="lg" className="bg-white hover:bg-gray-100 border border-gray-300 text-gray-800 font-semibold px-6 py-3 rounded-lg">
+                View Live Example
+              </Button>
             </div>
-            <div className="relative">
-              <Card className="bg-white shadow-lg">
-                <CardContent className="p-6">
+            <div className="relative ml-auto">
+              <Card className="rounded-2xl shadow-xl bg-white p-6 w-full max-w-md">
+                <CardContent className="p-0">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium">
@@ -120,10 +117,11 @@ export default function HomePage() {
                       </Button>
                     </div>
                   </div>
-
-                  <p className="text-xs text-gray-500 mt-4">Built in 4 minutes</p>
                 </CardContent>
               </Card>
+              <div className="absolute -bottom-2 -left-2">
+                <span className="rounded-lg px-3 py-1 bg-white shadow text-sm text-gray-500">Built in 4 minutes</span>
+              </div>
             </div>
           </div>
         </div>
