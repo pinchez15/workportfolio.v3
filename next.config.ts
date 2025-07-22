@@ -1,7 +1,45 @@
 import type { NextConfig } from "next";
 
+const securityHeaders = [
+  {
+    key: "Content-Security-Policy",
+    value: "default-src * 'self' 'unsafe-inline' data: blob:;",
+  },
+  {
+    key: "X-Frame-Options",
+    value: "SAMEORIGIN",
+  },
+  {
+    key: "Referrer-Policy",
+    value: "origin-when-cross-origin",
+  },
+];
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  headers: async () => [
+    {
+      source: "/(.*)",
+      headers: securityHeaders,
+    },
+  ],
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: "https://us-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/ingest/:path*",
+        destination: "https://us.i.posthog.com/:path*",
+      },
+      {
+        source: "/ingest/decide",
+        destination: "https://us.i.posthog.com/decide",
+      },
+    ];
+  },
+  // This is required to support PostHog trailing slash API requests
+  skipTrailingSlashRedirect: true,
 };
 
 export default nextConfig;

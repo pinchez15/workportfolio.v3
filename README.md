@@ -1,36 +1,135 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WorkPortfolio.io
 
-## Getting Started
+A professional portfolio builder built with Next.js 14, TypeScript, and modern web technologies.
 
-First, run the development server:
+## 🚀 Tech Stack
+
+- **Frontend**: Next.js 14 (App Router), TypeScript, React
+- **Styling**: Tailwind CSS, ShadCN UI
+- **Authentication**: Clerk
+- **Database**: Supabase (PostgreSQL)
+- **Analytics**: PostHog
+- **Email**: Resend + React Email
+- **Payments**: Clerk Billing (handled internally)
+- **Hosting**: Vercel
+
+## 📁 Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── [slug]/            # Dynamic portfolio pages
+│   ├── privacy/           # Privacy Policy
+│   ├── terms/             # Terms of Service
+│   ├── globals.css        # Global styles
+│   ├── layout.tsx         # Root layout
+│   ├── page.tsx           # Homepage
+│   ├── posthog.tsx        # PostHog analytics
+│   └── providers.tsx      # App providers
+├── components/            # React components
+│   └── ui/               # ShadCN UI components
+├── lib/                  # Utility libraries
+│   ├── analytics.ts      # PostHog configuration
+│   ├── supabase.ts       # Supabase client
+│   └── utils.ts          # Utility functions
+├── types/                # TypeScript type definitions
+│   └── database.ts       # Database schema types
+└── middleware.ts         # Clerk middleware
+```
+
+## 🛠️ Setup Instructions
+
+### 1. Clone and Install
+
+```bash
+git clone <repository-url>
+cd workportfolio.v3
+npm install
+```
+
+### 2. Environment Variables
+
+Copy the example environment file and fill in your credentials:
+
+```bash
+cp env.example .env.local
+```
+
+Required environment variables:
+
+```env
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# PostHog Analytics
+NEXT_PUBLIC_POSTHOG_KEY=phc_...
+NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
+
+# Resend Email
+RESEND_API_KEY=re_...
+
+
+```
+
+### 3. Database Setup
+
+1. Create a Supabase project
+2. Run the SQL schema from `supabase/schema.sql` in your Supabase SQL editor
+3. Create a storage bucket named `user_uploads`
+
+### 4. Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000) to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📄 Pages
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Homepage** (`/`): Landing page with "Coming Soon" message
+- **Privacy Policy** (`/privacy`): Privacy policy page
+- **Terms of Service** (`/terms`): Terms of service page
+- **Portfolio Pages** (`/[slug]`): Dynamic portfolio pages for users
 
-## Learn More
+## 🔧 Features
 
-To learn more about Next.js, take a look at the following resources:
+### Current Features
+- ✅ Modern, responsive design
+- ✅ TypeScript throughout
+- ✅ Clerk authentication setup
+- ✅ Supabase database schema
+- ✅ PostHog analytics integration
+- ✅ Security headers
+- ✅ Dynamic portfolio routing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Planned Features
+- 🔄 User authentication and registration
+- 🔄 Portfolio creation and management
+- 🔄 Project showcase functionality
+- 🔄 Image upload and storage
+- 🔄 Payment processing
+- 🔄 Email notifications
+- 🔄 Analytics dashboard
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚀 Deployment
 
-## Deploy on Vercel
+The project is configured for deployment on Vercel:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Connect your GitHub repository to Vercel
+2. Add environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📝 License
+
+This project is proprietary software. All rights reserved.
+
+## 🤝 Contributing
+
+This is a private project. Please contact the maintainers for contribution guidelines.
