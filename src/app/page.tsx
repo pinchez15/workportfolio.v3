@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
 
 export default function HomePage() {
   return (
@@ -30,10 +31,24 @@ export default function HomePage() {
                 </Link>
               </nav>
             </div>
-            <div className="flex items-center">
-              <Button variant="outline" className="font-medium bg-transparent">
-                Sign In
-              </Button>
+            
+            {/* Clerk Authentication Buttons */}
+            <div className="flex items-center space-x-4">
+              <SignedOut>
+                <SignInButton>
+                  <Button variant="ghost" className="text-gray-600 hover:text-gray-900 transition-colors">
+                    Sign in
+                  </Button>
+                </SignInButton>
+                <SignUpButton>
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-xl transition-all duration-200">
+                    Sign Up
+                  </Button>
+                </SignUpButton>
+              </SignedOut>
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
             </div>
           </div>
         </div>
@@ -78,13 +93,15 @@ export default function HomePage() {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                <Button
-                  size="lg"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-base"
-                >
-                  Create Your Free Portfolio
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
+                <SignUpButton>
+                  <Button
+                    size="lg"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-base"
+                  >
+                    Create Your Free Portfolio
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </SignUpButton>
                 <Link href="https://www.workportfolio.io/natepinches" target="_blank" rel="noopener noreferrer">
                   <Button
                     variant="outline"
@@ -456,13 +473,15 @@ export default function HomePage() {
             <p className="text-xl text-gray-600 mb-10 leading-relaxed">
               That&apos;s it. No domains, no themes, no excuses.
             </p>
-            <Button
-              size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-base"
-            >
-              Start Building Now
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
+            <SignUpButton>
+              <Button
+                size="lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-base"
+              >
+                Start Building Now
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </SignUpButton>
           </div>
         </div>
       </section>
@@ -502,12 +521,14 @@ export default function HomePage() {
                     </div>
                   ))}
                 </div>
-                <Button
-                  variant="outline"
-                  className="w-full mt-8 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl py-4 text-base font-medium bg-transparent"
-                >
-                  Create Your Free Portfolio
-                </Button>
+                <SignUpButton>
+                  <Button
+                    variant="outline"
+                    className="w-full mt-8 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl py-4 text-base font-medium bg-transparent"
+                  >
+                    Create Your Free Portfolio
+                  </Button>
+                </SignUpButton>
               </CardContent>
             </Card>
 
@@ -628,6 +649,7 @@ export default function HomePage() {
                   <p className="text-gray-600 mb-8 leading-relaxed text-lg">
                     Join professionals who&apos;ve ditched lengthy explanations for visual proof.
                   </p>
+                                  <SignUpButton>
                   <Button
                     size="lg"
                     className="w-full bg-blue-600 hover:bg-blue-700 mb-8 rounded-xl py-4 font-semibold text-base"
@@ -635,6 +657,7 @@ export default function HomePage() {
                     Create Your Free Portfolio
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
+                </SignUpButton>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center space-y-2 sm:space-y-0 sm:space-x-6 text-sm text-gray-500">
                     <span className="flex items-center">
                       <span className="w-2 h-2 bg-yellow-400 rounded-full mr-2"></span>
@@ -737,12 +760,14 @@ export default function HomePage() {
 
         {/* Fixed CTA Button */}
         <div className="fixed bottom-6 right-6 z-50">
-          <Button
-            size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-xl hover:shadow-2xl transition-all duration-200 rounded-xl px-6 py-3"
-          >
-            Create Your Free Portfolio
-          </Button>
+          <SignUpButton>
+            <Button
+              size="lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-xl hover:shadow-2xl transition-all duration-200 rounded-xl px-6 py-3"
+            >
+              Create Your Free Portfolio
+            </Button>
+          </SignUpButton>
         </div>
       </footer>
     </div>
