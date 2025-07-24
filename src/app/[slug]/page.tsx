@@ -11,7 +11,7 @@ interface PortfolioPageProps {
 
 export default async function PortfolioPage({ params }: PortfolioPageProps) {
   const { slug } = await params
-  const cookieStore = await cookies()
+  const cookieStore = cookies()
   const supabase = await createClient(cookieStore)
 
   // Fetch portfolio data by slug

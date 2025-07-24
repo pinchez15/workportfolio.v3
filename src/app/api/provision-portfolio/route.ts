@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createClient } from "@supabase/supabase-js";
 
@@ -7,12 +7,23 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
+    // Check if this is a webhook call with user ID in header
+    const userIdFromHeader = request.headers.get('X-User-ID');
     
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    let userId: string;
+    
+    if (userIdFromHeader) {
+      // Webhook call - use user ID from header
+      userId = userIdFromHeader;
+    } else {
+      // Regular authenticated call
+      const authResult = await auth();
+      if (!authResult.userId) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      userId = authResult.userId;
     }
 
     // Check if portfolio already exists
