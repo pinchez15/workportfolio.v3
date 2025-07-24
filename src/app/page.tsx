@@ -555,9 +555,11 @@ export default function HomePage() {
                     ),
                   )}
                 </div>
-                <Button className="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl py-4 text-base shadow-xl">
-                  Upgrade to Pro
-                </Button>
+                <SignUpButton>
+                  <Button className="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl py-4 text-base shadow-xl">
+                    Upgrade to Pro
+                  </Button>
+                </SignUpButton>
               </CardContent>
             </Card>
           </div>
@@ -624,7 +626,7 @@ export default function HomePage() {
               </div>
 
               <p className="text-xl text-blue-100 leading-relaxed">
-                Stop explaining—<em>start showing</em>. AI wrote their résumé. You wrote the code, built the app,
+                Stop explaining—<em>start showing</em>. AI wrote their résumé, but you wrote the code, built the app,
                 launched the brand. Show it.
               </p>
 
