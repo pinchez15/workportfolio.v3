@@ -4,12 +4,13 @@ import { cookies } from "next/headers"
 import { PortfolioClient } from "./portfolio-client"
 
 interface PortfolioPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 export default async function PortfolioPage({ params }: PortfolioPageProps) {
+  const { slug } = await params
   const cookieStore = await cookies()
   const supabase = await createClient(cookieStore)
 
@@ -17,7 +18,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
   const { data: portfolio, error: portfolioError } = await supabase
     .from("portfolios")
     .select("*")
-    .eq("slug", params.slug)
+    .eq("slug", slug)
     .single()
 
   if (portfolioError || !portfolio) {
