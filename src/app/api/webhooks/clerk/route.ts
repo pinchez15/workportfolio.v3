@@ -4,11 +4,6 @@ import { createClient } from '@supabase/supabase-js';
 
 const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function POST(request: NextRequest) {
   if (!webhookSecret) {
     console.error('CLERK_WEBHOOK_SECRET is not set');
@@ -62,6 +57,12 @@ async function createUserInDatabase(userData: {
   email_addresses?: Array<{ email_address: string }>;
 }) {
   try {
+    // Create Supabase client inside the function
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     // Generate username from Clerk data
     let username = userData.username;
     if (!username) {

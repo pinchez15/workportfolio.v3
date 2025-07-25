@@ -41,7 +41,7 @@ const steps = [
 ];
 
 export default function WelcomeDemo() {
-  const { user, isSignedIn } = useUser();
+  const { isSignedIn } = useUser();
   const router = useRouter();
   const [step, setStep] = useState(0);
 
