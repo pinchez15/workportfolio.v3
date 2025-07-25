@@ -1,6 +1,6 @@
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY, -- Clerk user ID
+  id TEXT PRIMARY KEY, -- Clerk user ID (not UUID format)
   username TEXT UNIQUE NOT NULL,
   name TEXT,
   title TEXT,
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- Create projects table
 CREATE TABLE IF NOT EXISTS projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   company TEXT,
   short_description TEXT,
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS projects (
 -- Create links table
 CREATE TABLE IF NOT EXISTS links (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   url TEXT NOT NULL,
   description TEXT,
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS links (
 -- Create portfolios table
 CREATE TABLE IF NOT EXISTS portfolios (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL, -- e.g. john_ops
   bio TEXT,
@@ -67,11 +67,11 @@ CREATE POLICY "Anyone can view user profiles" ON users
 
 -- Allow users to update their own data
 CREATE POLICY "Users can update their own data" ON users
-  FOR UPDATE USING (auth.uid()::text = id::text);
+  FOR UPDATE USING (auth.uid()::text = id);
 
 -- Allow users to insert their own data
 CREATE POLICY "Users can insert their own data" ON users
-  FOR INSERT WITH CHECK (auth.uid()::text = id::text);
+  FOR INSERT WITH CHECK (auth.uid()::text = id);
 
 -- Allow service role to insert users (for webhooks)
 CREATE POLICY "Service role can insert users" ON users
@@ -83,7 +83,7 @@ CREATE POLICY "Service role can insert users" ON users
 -- RLS Policies for projects table
 -- Users can view their own projects
 CREATE POLICY "Users can view their own projects" ON projects
-  FOR SELECT USING (auth.uid()::text = user_id::text);
+  FOR SELECT USING (auth.uid()::text = user_id);
 
 -- Anyone can view public projects (for portfolios)
 CREATE POLICY "Anyone can view public projects" ON projects
@@ -91,12 +91,12 @@ CREATE POLICY "Anyone can view public projects" ON projects
 
 -- Users can manage their own projects
 CREATE POLICY "Users can manage their own projects" ON projects
-  FOR ALL USING (auth.uid()::text = user_id::text);
+  FOR ALL USING (auth.uid()::text = user_id);
 
 -- RLS Policies for links table
 -- Users can view their own links
 CREATE POLICY "Users can view their own links" ON links
-  FOR SELECT USING (auth.uid()::text = user_id::text);
+  FOR SELECT USING (auth.uid()::text = user_id);
 
 -- Anyone can view public links (for portfolios)
 CREATE POLICY "Anyone can view public links" ON links
@@ -104,12 +104,12 @@ CREATE POLICY "Anyone can view public links" ON links
 
 -- Users can manage their own links
 CREATE POLICY "Users can manage their own links" ON links
-  FOR ALL USING (auth.uid()::text = user_id::text);
+  FOR ALL USING (auth.uid()::text = user_id);
 
 -- RLS Policies for portfolios table
 -- Users can view their own portfolios
 CREATE POLICY "Users can view their own portfolios" ON portfolios
-  FOR SELECT USING (auth.uid()::text = user_id::text);
+  FOR SELECT USING (auth.uid()::text = user_id);
 
 -- Anyone can view portfolios by slug (public portfolios)
 CREATE POLICY "Anyone can view portfolios by slug" ON portfolios
@@ -117,7 +117,7 @@ CREATE POLICY "Anyone can view portfolios by slug" ON portfolios
 
 -- Users can manage their own portfolios
 CREATE POLICY "Users can manage their own portfolios" ON portfolios
-  FOR ALL USING (auth.uid()::text = user_id::text);
+  FOR ALL USING (auth.uid()::text = user_id);
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
