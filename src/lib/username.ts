@@ -3,9 +3,9 @@
  * Priority: firstName.lastName > username > email_prefix > user_id_fallback
  */
 export function generateUsername(userData: {
-  first_name?: string;
-  last_name?: string;
-  username?: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  username?: string | null;
   emailAddresses?: Array<{ emailAddress: string }>;
   email_addresses?: Array<{ email_address: string }>;
   id: string;

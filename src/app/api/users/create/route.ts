@@ -3,7 +3,7 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
 import { generateUsername } from '@/lib/username';
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     console.log('🔄 Fallback user creation API called');
     
