@@ -44,7 +44,6 @@ export default function WelcomeDemo() {
   const { user, isSignedIn } = useUser();
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [isProvisioning, setIsProvisioning] = useState(false);
 
   useEffect(() => {
     if (!isSignedIn) {
@@ -52,33 +51,15 @@ export default function WelcomeDemo() {
       return;
     }
 
-    // Provision portfolio in background
-    const provisionPortfolio = async () => {
-      setIsProvisioning(true);
-      try {
-        await fetch("/api/provision-portfolio", { 
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
-      } catch (error) {
-        console.error('Error provisioning portfolio:', error);
-      } finally {
-        setIsProvisioning(false);
-      }
-    };
-
-    provisionPortfolio();
+    // No longer provisioning portfolios automatically
   }, [isSignedIn, router]);
 
   const nextStep = () => {
     if (step < steps.length - 1) {
       setStep((prev) => prev + 1);
     } else {
-      // Final step - redirect to their portfolio
-      const username = user?.username || user?.id;
-      router.push(`/${username}`);
+      // Final step - redirect to homepage (which will redirect to portfolio for logged in users)
+      router.push('/');
     }
   };
 
@@ -124,16 +105,9 @@ export default function WelcomeDemo() {
             <Button
               onClick={nextStep}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl"
-              disabled={isProvisioning}
             >
-              {isProvisioning ? "Setting up your portfolio..." : steps[step].action}
+              {steps[step].action}
             </Button>
-
-            {isProvisioning && (
-              <p className="text-sm text-gray-500 mt-3">
-                Creating your portfolio in the background...
-              </p>
-            )}
           </CardContent>
         </Card>
       </div>

@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'svix';
+import { createClient } from '@supabase/supabase-js';
 
 const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function POST(request: NextRequest) {
   if (!webhookSecret) {
@@ -18,15 +24,25 @@ export async function POST(request: NextRequest) {
 
   try {
     const wh = new Webhook(webhookSecret);
-    const event = wh.verify(payload, headers) as { type: string; data: { id: string } };
+    const event = wh.verify(payload, headers) as { 
+      type: string; 
+      data: { 
+        id: string;
+        username?: string;
+        first_name?: string;
+        last_name?: string;
+        image_url?: string;
+        email_addresses?: Array<{ email_address: string }>;
+      } 
+    };
 
     // Handle user.created event
     if (event.type === 'user.created') {
       console.log('User created webhook received for user:', event.data.id);
       
-      // Asynchronously provision portfolio (don't await to avoid blocking webhook response)
-      provisionPortfolio(event.data.id).catch(error => {
-        console.error('Portfolio provisioning failed:', error);
+      // Create user in database (don't await to avoid blocking webhook response)
+      createUserInDatabase(event.data).catch(error => {
+        console.error('User creation failed:', error);
       });
     }
 
@@ -37,24 +53,45 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function provisionPortfolio(userId: string) {
+async function createUserInDatabase(userData: {
+  id: string;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  image_url?: string;
+  email_addresses?: Array<{ email_address: string }>;
+}) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/provision-portfolio`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
-        'X-User-ID': userId, // Pass user ID in header since webhook context doesn't have auth
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Portfolio provisioning failed: ${response.statusText}`);
+    // Generate username from Clerk data
+    let username = userData.username;
+    if (!username) {
+      // Fallback to email prefix if no username
+      const email = userData.email_addresses?.[0]?.email_address;
+      username = email ? email.split('@')[0] : `user_${userData.id.slice(0, 8)}`;
     }
 
-    console.log(`Portfolio provisioned successfully for user: ${userId}`);
+    // Construct full name
+    const name = [userData.first_name, userData.last_name]
+      .filter(Boolean)
+      .join(' ') || undefined;
+
+    // Insert user into database
+    const { error } = await supabase
+      .from('users')
+      .insert({
+        id: userData.id,
+        username,
+        name,
+        avatar_url: userData.image_url,
+      });
+
+    if (error) {
+      throw new Error(`Database insert failed: ${error.message}`);
+    }
+
+    console.log(`User created successfully in database: ${userData.id} (${username})`);
   } catch (error) {
-    console.error('Portfolio provisioning error:', error);
+    console.error('User creation error:', error);
     throw error;
   }
 }

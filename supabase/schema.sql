@@ -1,6 +1,3 @@
--- Enable Row Level Security
-ALTER DATABASE postgres SET "app.jwt_secret" TO 'your-jwt-secret';
-
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY, -- Clerk user ID
@@ -64,46 +61,66 @@ ALTER TABLE links ENABLE ROW LEVEL SECURITY;
 ALTER TABLE portfolios ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for users table
-CREATE POLICY "Users can view their own data" ON users
-  FOR SELECT USING (auth.uid()::text = id::text);
+-- Allow anyone to view user profiles (needed for public portfolios)
+CREATE POLICY "Anyone can view user profiles" ON users
+  FOR SELECT USING (true);
 
+-- Allow users to update their own data
 CREATE POLICY "Users can update their own data" ON users
   FOR UPDATE USING (auth.uid()::text = id::text);
 
+-- Allow users to insert their own data
 CREATE POLICY "Users can insert their own data" ON users
   FOR INSERT WITH CHECK (auth.uid()::text = id::text);
 
+-- Allow service role to insert users (for webhooks)
+CREATE POLICY "Service role can insert users" ON users
+  FOR INSERT WITH CHECK (
+    auth.jwt() ->> 'role' = 'service_role' OR 
+    auth.role() = 'service_role'
+  );
+
 -- RLS Policies for projects table
+-- Users can view their own projects
 CREATE POLICY "Users can view their own projects" ON projects
   FOR SELECT USING (auth.uid()::text = user_id::text);
 
-CREATE POLICY "Users can view public projects" ON projects
+-- Anyone can view public projects (for portfolios)
+CREATE POLICY "Anyone can view public projects" ON projects
   FOR SELECT USING (visible = true);
 
+-- Users can manage their own projects
 CREATE POLICY "Users can manage their own projects" ON projects
   FOR ALL USING (auth.uid()::text = user_id::text);
 
 -- RLS Policies for links table
+-- Users can view their own links
 CREATE POLICY "Users can view their own links" ON links
   FOR SELECT USING (auth.uid()::text = user_id::text);
 
-CREATE POLICY "Users can view public links" ON links
+-- Anyone can view public links (for portfolios)
+CREATE POLICY "Anyone can view public links" ON links
   FOR SELECT USING (visible = true);
 
+-- Users can manage their own links
 CREATE POLICY "Users can manage their own links" ON links
   FOR ALL USING (auth.uid()::text = user_id::text);
 
 -- RLS Policies for portfolios table
+-- Users can view their own portfolios
 CREATE POLICY "Users can view their own portfolios" ON portfolios
   FOR SELECT USING (auth.uid()::text = user_id::text);
 
+-- Anyone can view portfolios by slug (public portfolios)
 CREATE POLICY "Anyone can view portfolios by slug" ON portfolios
   FOR SELECT USING (true);
 
+-- Users can manage their own portfolios
 CREATE POLICY "Users can manage their own portfolios" ON portfolios
   FOR ALL USING (auth.uid()::text = user_id::text);
 
 -- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
 CREATE INDEX IF NOT EXISTS idx_projects_visible ON projects(visible);
 CREATE INDEX IF NOT EXISTS idx_links_user_id ON links(user_id);
@@ -116,8 +133,28 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('user_uploads', 'user_uploads', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Storage RLS Policy
-CREATE POLICY "Users can access their files" ON storage.objects
-  FOR ALL USING (
-    auth.uid()::text = owner
-  ); 
+-- Storage RLS Policies
+-- Allow authenticated users to upload to their own folder
+CREATE POLICY "Users can upload their own files" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'user_uploads' AND
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Allow users to update their own files
+CREATE POLICY "Users can update their own files" ON storage.objects
+  FOR UPDATE USING (
+    bucket_id = 'user_uploads' AND
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Allow users to delete their own files
+CREATE POLICY "Users can delete their own files" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'user_uploads' AND
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Allow public read access to uploaded files (for portfolio viewing)
+CREATE POLICY "Public can view uploaded files" ON storage.objects
+  FOR SELECT USING (bucket_id = 'user_uploads'); 

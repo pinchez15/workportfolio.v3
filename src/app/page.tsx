@@ -7,8 +7,26 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
+import { auth, currentUser } from "@clerk/nextjs/server"
+import { redirect } from "next/navigation"
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Check if user is authenticated and redirect to their portfolio
+  const { userId } = await auth();
+  
+  if (userId) {
+    const user = await currentUser();
+    
+    // Generate username - same logic as portfolio page
+    let username = user?.username;
+    if (!username) {
+      const email = user?.emailAddresses?.[0]?.emailAddress;
+      username = email ? email.split('@')[0] : `user_${userId.slice(0, 8)}`;
+    }
+    
+    redirect(`/${username}`);
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/30">
       {/* Header */}
