@@ -13,8 +13,11 @@ import { createClient } from "@supabase/supabase-js"
 import { generateUsername } from "@/lib/username"
 
 export default async function HomePage() {
+  console.log('🏠 Homepage accessed at:', new Date().toISOString());
+  
   // Check if user is authenticated and redirect to their portfolio
   const { userId } = await auth();
+  console.log('🔐 Auth check - userId:', userId);
   
   if (userId) {
     const user = await currentUser();
@@ -37,25 +40,36 @@ export default async function HomePage() {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
+    console.log('🔧 Environment check:', {
+      supabaseUrl: supabaseUrl ? '✅ Set' : '❌ Missing',
+      supabaseKey: supabaseKey ? '✅ Set' : '❌ Missing'
+    });
+    
     if (!supabaseUrl || !supabaseKey) {
-      console.error('Missing Supabase environment variables');
+      console.error('❌ Missing Supabase environment variables - redirecting to welcome');
       // If we can't check the database, assume user needs onboarding
       redirect('/welcome-demo');
     }
     
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    const { data: existingUser } = await supabase
+    console.log('📋 Checking if user exists in Supabase for userId:', userId);
+    
+    const { data: existingUser, error } = await supabase
       .from('users')
       .select('id')
       .eq('id', userId)
       .single();
     
+    console.log('📊 Database check result:', { existingUser, error });
+    
     if (existingUser) {
       // User exists in database, redirect to their portfolio
+      console.log(`✅ User exists - redirecting to portfolio: /${username}`);
       redirect(`/${username}`);
     } else {
       // User doesn't exist in database, redirect to welcome page
+      console.log('🆕 User not found in database - redirecting to welcome');
       redirect('/welcome-demo');
     }
   }
