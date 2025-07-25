@@ -34,10 +34,16 @@ export default async function HomePage() {
     });
     
     // Check if user exists in Supabase
-    const supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('Missing Supabase environment variables');
+      // If we can't check the database, assume user needs onboarding
+      redirect('/welcome-demo');
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseKey);
     
     const { data: existingUser } = await supabase
       .from('users')
