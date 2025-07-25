@@ -1,12 +1,15 @@
 "use client"
 
 import Link from "next/link"
-import { ExternalLink, Github, Linkedin, Mail, Youtube, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
+import { ExternalLink, Github, Linkedin, Mail, Youtube, ArrowRight, ChevronLeft, ChevronRight, Edit, Save, Plus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useState } from "react"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { useState, useEffect } from "react"
+import { useUser } from "@clerk/nextjs"
 import type { User, Portfolio, Project, Link as DatabaseLink } from "@/types/database"
 
 interface PortfolioClientProps {
@@ -35,13 +38,27 @@ const getIcon = (iconName: string) => {
 }
 
 export function PortfolioClient({ user, portfolio, projects, links, allSkills }: PortfolioClientProps) {
+  const { user: clerkUser, isSignedIn } = useUser()
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
+  
+  // Edit mode states
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  
+  // Editable user data
+  const [editableUser, setEditableUser] = useState<User>(user)
+  const [editableProjects, setEditableProjects] = useState<Project[]>(projects)
+  const [editableLinks, setEditableLinks] = useState<DatabaseLink[]>(links)
 
-  // Get featured and recent projects
-  const featuredProject = projects.find((p) => p.visible) || projects[0]
-  const recentProjects = projects.filter((p) => p.visible && p.id !== featuredProject?.id)
+  // Check if current user owns this portfolio
+  const isOwner = isSignedIn && clerkUser?.id === user.id
+
+  // Get featured and recent projects (use editable data)
+  const currentProjects = isEditMode ? editableProjects : projects
+  const featuredProject = currentProjects.find((p) => p.visible) || currentProjects[0]
+  const recentProjects = currentProjects.filter((p) => p.visible && p.id !== featuredProject?.id)
 
   // Filter projects based on selected skills
   const filteredRecentProjects =
@@ -53,6 +70,56 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
   const toggleSkillFilter = (skill: string) => {
     setSelectedSkills((prev) => (prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]))
+  }
+
+  // Edit mode functions
+  const enterEditMode = () => {
+    setIsEditMode(true)
+    // Reset editable data to current state
+    setEditableUser(user)
+    setEditableProjects(projects)
+    setEditableLinks(links)
+  }
+
+  const cancelEdit = () => {
+    setIsEditMode(false)
+    // Reset editable data
+    setEditableUser(user)
+    setEditableProjects(projects)
+    setEditableLinks(links)
+  }
+
+  const saveChanges = async () => {
+    if (!isOwner) return
+    
+    setIsSaving(true)
+    try {
+      // Save user data
+      const userResponse = await fetch('/api/users/update', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editableUser.name,
+          title: editableUser.title,
+          bio: editableUser.bio,
+        }),
+      })
+
+      if (!userResponse.ok) {
+        throw new Error('Failed to update user')
+      }
+
+      // TODO: Save projects and links
+      
+      setIsEditMode(false)
+      // Refresh the page data or update local state
+      window.location.reload() // Temporary - should be optimistic updates
+    } catch (error) {
+      console.error('Failed to save changes:', error)
+      alert('Failed to save changes. Please try again.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Get project images - use image_paths if available, otherwise fall back to image_path
@@ -107,29 +174,66 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
             <Link href="/" className="text-lg font-semibold text-blue-600">
               WorkPortfolio
             </Link>
-            <Link href="/">
-              <Button variant="outline" size="sm" className="text-sm bg-transparent">
-                Create Portfolio
-              </Button>
-            </Link>
+            <div className="flex items-center space-x-2">
+              {isOwner && !isEditMode && (
+                <Button
+                  onClick={enterEditMode}
+                  variant="outline"
+                  size="sm"
+                  className="text-sm bg-transparent border-blue-600 text-blue-600 hover:bg-blue-50"
+                >
+                  <Edit className="w-4 h-4 mr-1" />
+                  Edit Portfolio
+                </Button>
+              )}
+              {isEditMode && (
+                <>
+                  <Button
+                    onClick={cancelEdit}
+                    variant="outline"
+                    size="sm"
+                    className="text-sm bg-transparent"
+                    disabled={isSaving}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={saveChanges}
+                    size="sm"
+                    className="text-sm bg-blue-600 hover:bg-blue-700 text-white"
+                    disabled={isSaving}
+                  >
+                    <Save className="w-4 h-4 mr-1" />
+                    {isSaving ? "Saving..." : "Save Now"}
+                  </Button>
+                </>
+              )}
+              {!isOwner && (
+                <Link href="/">
+                  <Button variant="outline" size="sm" className="text-sm bg-transparent">
+                    Create Portfolio
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
-        {/* Hero Section - Simplified */}
+        {/* Hero Section - Editable */}
         <div className="bg-white rounded-2xl p-6 sm:p-8 mb-8 shadow-sm">
           <div className="flex items-start space-x-4">
             {/* Avatar */}
-            {user.avatar_url ? (
+            {(isEditMode ? editableUser.avatar_url : user.avatar_url) ? (
               <img
-                src={user.avatar_url}
-                alt={`${user.name} avatar`}
+                src={isEditMode ? editableUser.avatar_url : user.avatar_url}
+                alt={`${isEditMode ? editableUser.name : user.name} avatar`}
                 className="w-16 h-16 rounded-full object-cover flex-shrink-0"
               />
             ) : (
               <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
-                {(user.name || user.username)
+                {((isEditMode ? editableUser.name : user.name) || user.username)
                   .split(" ")
                   .map((n) => n[0])
                   .join("")}
@@ -138,11 +242,48 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                Hey, I'm {user.name || user.username}
-              </h1>
-              <p className="text-lg text-gray-600 mb-4">{user.title}</p>
-              <p className="text-gray-600 leading-relaxed">{portfolio.bio || user.bio}</p>
+              {isEditMode ? (
+                // Edit mode - show inputs
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <Input
+                      value={editableUser.name || ""}
+                      onChange={(e) => setEditableUser(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Your full name"
+                      className="text-2xl font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <Input
+                      value={editableUser.title || ""}
+                      onChange={(e) => setEditableUser(prev => ({ ...prev, title: e.target.value }))}
+                      placeholder="Your professional title"
+                      className="text-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                    <Textarea
+                      value={editableUser.bio || ""}
+                      onChange={(e) => setEditableUser(prev => ({ ...prev, bio: e.target.value }))}
+                      placeholder="Tell people about yourself..."
+                      rows={3}
+                      className="resize-none"
+                    />
+                  </div>
+                </div>
+              ) : (
+                // View mode - show content
+                <>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                    Hey, I'm {user.name || user.username}
+                  </h1>
+                  <p className="text-lg text-gray-600 mb-4">{user.title}</p>
+                  <p className="text-gray-600 leading-relaxed">{portfolio.bio || user.bio}</p>
+                </>
+              )}
             </div>
           </div>
         </div>
