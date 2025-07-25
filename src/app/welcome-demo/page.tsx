@@ -51,7 +51,26 @@ export default function WelcomeDemo() {
       return;
     }
 
-    // No longer provisioning portfolios automatically
+    // Call fallback API to ensure user is created in database
+    const ensureUserExists = async () => {
+      try {
+        console.log('🔄 Ensuring user exists in database...');
+        const response = await fetch('/api/users/create', {
+          method: 'POST',
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('✅ User creation result:', result);
+        } else {
+          console.error('❌ Failed to create user:', await response.text());
+        }
+      } catch (error) {
+        console.error('❌ Error ensuring user exists:', error);
+      }
+    };
+
+    ensureUserExists();
   }, [isSignedIn, router]);
 
   const nextStep = () => {

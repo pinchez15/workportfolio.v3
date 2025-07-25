@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge"
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
 import { auth, currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
+import { createClient } from "@supabase/supabase-js"
+import { generateUsername } from "@/lib/username"
 
 export default async function HomePage() {
   // Check if user is authenticated and redirect to their portfolio
@@ -17,14 +19,39 @@ export default async function HomePage() {
   if (userId) {
     const user = await currentUser();
     
-    // Generate username - same logic as portfolio page
-    let username = user?.username;
-    if (!username) {
-      const email = user?.emailAddresses?.[0]?.emailAddress;
-      username = email ? email.split('@')[0] : `user_${userId.slice(0, 8)}`;
+    if (!user) {
+      // User is authenticated but we can't get user data, redirect to sign-in
+      redirect('/sign-in');
     }
     
-    redirect(`/${username}`);
+    // Generate username using consistent logic
+    const username = generateUsername({
+      first_name: user.firstName,
+      last_name: user.lastName,
+      username: user.username,
+      emailAddresses: user.emailAddresses,
+      id: userId
+    });
+    
+    // Check if user exists in Supabase
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', userId)
+      .single();
+    
+    if (existingUser) {
+      // User exists in database, redirect to their portfolio
+      redirect(`/${username}`);
+    } else {
+      // User doesn't exist in database, redirect to welcome page
+      redirect('/welcome-demo');
+    }
   }
 
   return (
