@@ -721,7 +721,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                   <p className="text-sm text-gray-600 mb-2">
                     {featuredProject.company}, {formatDate(featuredProject.created_at)}
                   </p>
-                  <p className="text-gray-700 text-sm leading-relaxed">{featuredProject.short_description}</p>
+                  <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{featuredProject.short_description}</p>
                 </div>
               </div>
             </Card>
@@ -787,7 +787,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                         <p className="text-xs text-gray-600 mb-1">
                           {project.company}, {formatDate(project.created_at)}
                         </p>
-                        <p className="text-xs text-gray-700 leading-relaxed line-clamp-2">{project.short_description}</p>
+                        <p className="text-xs text-gray-700 leading-relaxed line-clamp-2 whitespace-pre-wrap">{project.short_description}</p>
                       </div>
 
                       {/* View indicator or Edit buttons */}
@@ -893,7 +893,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
               {(isEditMode ? editableLinks : links).map((link) => (
                 isEditMode ? (
                   <Card key={link.id} className="bg-white shadow-sm border-0 rounded-xl overflow-hidden hover:shadow-md transition-all duration-200">
-                    <CardContent className="p-4">
+                    <CardContent className="py-2 px-4">
                       <div className="flex items-center space-x-4">
                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0">
                           {getIcon(link.icon || "ExternalLink")}
@@ -926,7 +926,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                 ) : (
                   <Link key={link.id} href={formatUrl(link.url)} target="_blank" rel="noopener noreferrer">
                     <Card className="bg-white shadow-sm border-0 rounded-xl overflow-hidden hover:shadow-md transition-all duration-200">
-                      <CardContent className="p-4">
+                      <CardContent className="py-2 px-4">
                         <div className="flex items-center space-x-4">
                           <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0">
                             {getIcon(link.icon || "ExternalLink")}
@@ -1057,7 +1057,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
       {/* Project Edit/Add Modal */}
       <Dialog open={isAddingProject} onOpenChange={closeProjectModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900">
               {editingProject ? 'Edit Project' : 'Add New Project'}
@@ -1294,7 +1294,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
       {/* Project View Modal */}
       <Dialog open={!!selectedProject} onOpenChange={() => setSelectedProject(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           {selectedProject && (
             <>
               <DialogHeader>
@@ -1352,7 +1352,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                 {/* Project Details */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">About this project</h3>
-                  <p className="text-gray-700 leading-relaxed">{selectedProject.long_description}</p>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{selectedProject.long_description}</p>
                 </div>
 
                 {selectedProject.skills && selectedProject.skills.length > 0 && (
