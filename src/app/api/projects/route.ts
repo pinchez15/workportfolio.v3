@@ -16,9 +16,12 @@ export async function POST(request: NextRequest) {
       company, 
       short_description, 
       long_description, 
+      start_date,
+      end_date,
       url, 
       skills, 
-      visible 
+      visible,
+      featured 
     } = body;
 
     // Create Supabase client
@@ -41,9 +44,12 @@ export async function POST(request: NextRequest) {
         company,
         short_description,
         long_description,
+        start_date: start_date || null,
+        end_date: end_date || null,
         url,
         skills,
         visible: visible !== false, // default to true
+        featured: featured || false,
         image_path: null // TODO: Add image upload support
       })
       .select()
@@ -80,9 +86,12 @@ export async function PUT(request: NextRequest) {
       company, 
       short_description, 
       long_description, 
+      start_date,
+      end_date,
       url, 
       skills, 
-      visible 
+      visible,
+      featured 
     } = body;
 
     if (!id) {
@@ -108,9 +117,12 @@ export async function PUT(request: NextRequest) {
         company,
         short_description,
         long_description,
+        start_date: start_date || null,
+        end_date: end_date || null,
         url,
         skills,
-        visible: visible !== false
+        visible: visible !== false,
+        featured: featured || false
       })
       .eq('id', id)
       .eq('user_id', userId) // Ensure user owns this project

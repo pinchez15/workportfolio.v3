@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ExternalLink, Github, Linkedin, Mail, Youtube, ArrowRight, ChevronLeft, ChevronRight, Edit, Save, Plus, X } from "lucide-react"
+import { ExternalLink, Github, Linkedin, Mail, Youtube, ArrowRight, ChevronLeft, ChevronRight, Edit, Save, Plus, X, Upload, FileImage } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useState, useEffect } from "react"
 import { useUser, UserButton } from "@clerk/nextjs"
 import type { User, Portfolio, Project, Link as DatabaseLink } from "@/types/database"
+import { getSkillSuggestions } from "@/lib/skills"
 
 interface PortfolioClientProps {
   user: User
@@ -60,10 +61,22 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     company: '',
     short_description: '',
     long_description: '',
+    start_date: '',
+    end_date: '',
     url: '',
     skills: [] as string[],
-    visible: true
+    visible: true,
+    featured: false
   })
+
+  // Image upload states
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const [isDragOver, setIsDragOver] = useState(false)
+
+  // Skills search states
+  const [skillsInput, setSkillsInput] = useState('')
+  const [skillSuggestions, setSkillSuggestions] = useState<string[]>([])
+  const [showSkillSuggestions, setShowSkillSuggestions] = useState(false)
 
   // Link editing states
   const [isAddingLink, setIsAddingLink] = useState(false)
@@ -153,11 +166,15 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
       company: '',
       short_description: '',
       long_description: '',
+      start_date: '',
+      end_date: '',
       url: '',
       skills: [],
-      visible: true
+      visible: true,
+      featured: false
     })
     setEditingProject(null)
+    setUploadedFiles([])
     setIsAddingProject(true)
   }
 
@@ -167,17 +184,85 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
       company: project.company || '',
       short_description: project.short_description || '',
       long_description: project.long_description || '',
+      start_date: project.start_date || '',
+      end_date: project.end_date || '',
       url: project.url || '',
       skills: project.skills || [],
-      visible: project.visible
+      visible: project.visible,
+      featured: false // TODO: Add featured field to Project type
     })
     setEditingProject(project)
+    setUploadedFiles([])
     setIsAddingProject(true)
   }
 
   const closeProjectModal = () => {
     setIsAddingProject(false)
     setEditingProject(null)
+    setUploadedFiles([])
+  }
+
+  // Image upload handlers
+  const handleFileSelect = (files: FileList | null) => {
+    if (!files) return
+    
+    const validFiles = Array.from(files).filter(file => {
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'application/pdf']
+      const maxSize = 10 * 1024 * 1024 // 10MB
+      return validTypes.includes(file.type) && file.size <= maxSize
+    })
+    
+    setUploadedFiles(prev => [...prev, ...validFiles].slice(0, 5)) // Max 5 files
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+    handleFileSelect(e.dataTransfer.files)
+  }
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  // Skills management
+  const handleSkillsInputChange = (value: string) => {
+    setSkillsInput(value)
+    if (value.trim()) {
+      const suggestions = getSkillSuggestions(value)
+      setSkillSuggestions(suggestions)
+      setShowSkillSuggestions(true)
+    } else {
+      setShowSkillSuggestions(false)
+    }
+  }
+
+  const addSkill = (skill: string) => {
+    if (!projectForm.skills.includes(skill)) {
+      setProjectForm(prev => ({ 
+        ...prev, 
+        skills: [...prev.skills, skill]
+      }))
+    }
+    setSkillsInput('')
+    setShowSkillSuggestions(false)
+  }
+
+  const removeSkill = (skillToRemove: string) => {
+    setProjectForm(prev => ({ 
+      ...prev, 
+      skills: prev.skills.filter(skill => skill !== skillToRemove)
+    }))
   }
 
   const saveProject = async () => {
@@ -928,7 +1013,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
               <Textarea
                 value={projectForm.short_description}
                 onChange={(e) => setProjectForm(prev => ({ ...prev, short_description: e.target.value }))}
-                placeholder="Brief description for project cards"
+                placeholder="5 words or less"
                 rows={2}
                 className="w-full resize-none"
               />
@@ -939,10 +1024,32 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
               <Textarea
                 value={projectForm.long_description}
                 onChange={(e) => setProjectForm(prev => ({ ...prev, long_description: e.target.value }))}
-                placeholder="Detailed description for project modal"
+                placeholder="Share as much as you'd like! Include outcomes, metrics and challenges if any."
                 rows={4}
                 className="w-full resize-none"
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                <input
+                  type="month"
+                  value={projectForm.start_date}
+                  onChange={(e) => setProjectForm(prev => ({ ...prev, start_date: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                <input
+                  type="month"
+                  value={projectForm.end_date}
+                  onChange={(e) => setProjectForm(prev => ({ ...prev, end_date: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Leave empty if ongoing</p>
+              </div>
             </div>
 
             <div>
@@ -957,45 +1064,135 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Skills/Technologies</label>
-              <Input
-                value={projectForm.skills.join(', ')}
-                onChange={(e) => setProjectForm(prev => ({ 
-                  ...prev, 
-                  skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
-                }))}
-                placeholder="React, TypeScript, Node.js (comma separated)"
-                className="w-full"
-              />
+              <div className="relative">
+                <Input
+                  value={skillsInput}
+                  onChange={(e) => handleSkillsInputChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && skillsInput.trim()) {
+                      e.preventDefault()
+                      addSkill(skillsInput.trim())
+                    }
+                  }}
+                  placeholder="Start typing to search skills..."
+                  className="w-full"
+                />
+                {showSkillSuggestions && skillSuggestions.length > 0 && (
+                  <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-40 overflow-y-auto">
+                    {skillSuggestions.map((skill) => (
+                      <button
+                        key={skill}
+                        onClick={() => addSkill(skill)}
+                        className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm"
+                      >
+                        {skill}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {projectForm.skills.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {projectForm.skills.map((skill) => (
+                    <span
+                      key={skill}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                    >
+                      {skill}
+                      <button
+                        onClick={() => removeSkill(skill)}
+                        className="ml-2 text-blue-600 hover:text-blue-800"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Project Images</label>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onChange={(e) => {
-                  // TODO: Implement image upload to Supabase storage
-                  console.log('Files selected:', e.target.files)
-                }}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Upload images for your project (multiple files supported)
-              </p>
+              <div
+                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                  isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <div className="flex flex-col items-center">
+                  <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                  <p className="text-sm font-medium text-gray-900 mb-1">
+                    Drag and drop images here, or{' '}
+                    <label className="text-blue-600 hover:text-blue-700 cursor-pointer">
+                      browse files
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,application/pdf"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => handleFileSelect(e.target.files)}
+                      />
+                    </label>
+                  </p>
+                  <p className="text-xs text-gray-500 mb-1">
+                    Upload screenshots, mockups, or project visuals
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Supports: JPEG, PNG, GIF, WebP, PDF • Max 10MB per file • Up to 5 files
+                  </p>
+                </div>
+              </div>
+              
+              {uploadedFiles.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {uploadedFiles.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <div className="flex items-center">
+                        <FileImage className="h-4 w-4 text-gray-400 mr-2" />
+                        <span className="text-sm text-gray-700">{file.name}</span>
+                        <span className="text-xs text-gray-500 ml-2">
+                          ({(file.size / 1024 / 1024).toFixed(1)} MB)
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => removeFile(index)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="visible"
-                checked={projectForm.visible}
-                onChange={(e) => setProjectForm(prev => ({ ...prev, visible: e.target.checked }))}
-                className="rounded border-gray-300"
-              />
-              <label htmlFor="visible" className="text-sm text-gray-700">
-                Make this project visible to visitors
-              </label>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="visible"
+                  checked={projectForm.visible}
+                  onChange={(e) => setProjectForm(prev => ({ ...prev, visible: e.target.checked }))}
+                  className="rounded border-gray-300"
+                />
+                <label htmlFor="visible" className="text-sm text-gray-700">
+                  Make this project visible to visitors
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="featured"
+                  checked={projectForm.featured}
+                  onChange={(e) => setProjectForm(prev => ({ ...prev, featured: e.target.checked }))}
+                  className="rounded border-gray-300"
+                />
+                <label htmlFor="featured" className="text-sm text-gray-700">
+                  Feature this project (show in "What I'm working on" section)
+                </label>
+              </div>
             </div>
 
             <div className="flex justify-end space-x-3 pt-4 border-t">
