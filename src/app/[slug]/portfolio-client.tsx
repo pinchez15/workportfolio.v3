@@ -224,7 +224,25 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     const validFiles = Array.from(files).filter(file => {
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'application/pdf']
       const maxSize = 10 * 1024 * 1024 // 10MB
-      return validTypes.includes(file.type) && file.size <= maxSize
+      
+      console.log(`Processing file: ${file.name}, size: ${file.size}, type: ${file.type}`)
+      
+      if (!validTypes.includes(file.type)) {
+        alert(`File type not supported: ${file.type}`)
+        return false
+      }
+      
+      if (file.size > maxSize) {
+        alert(`File too large: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB). Max size is 10MB.`)
+        return false
+      }
+      
+      if (file.size === 0) {
+        alert(`File appears to be empty: ${file.name}`)
+        return false
+      }
+      
+      return true
     })
     
     setUploadedFiles(prev => [...prev, ...validFiles].slice(0, 5)) // Max 5 files
@@ -284,6 +302,34 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     if (!isOwner) return
     
     try {
+      let imagePaths: string[] = []
+
+      // Upload images if any are selected
+      if (uploadedFiles.length > 0) {
+        const formData = new FormData()
+        uploadedFiles.forEach(file => {
+          formData.append('files', file)
+        })
+
+        const uploadResponse = await fetch('/api/upload/images', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (uploadResponse.ok) {
+          const { files } = await uploadResponse.json()
+          imagePaths = files.map((f: { url: string }) => f.url)
+        } else {
+          console.warn('Image upload failed, continuing without images')
+        }
+      }
+
+      const projectData = {
+        ...projectForm,
+        image_paths: imagePaths.length > 0 ? imagePaths : null,
+        image_path: imagePaths.length > 0 ? imagePaths[0] : null
+      }
+
       if (editingProject) {
         // Update existing project
         const response = await fetch('/api/projects', {
@@ -291,7 +337,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             id: editingProject.id,
-            ...projectForm
+            ...projectData
           }),
         })
 
@@ -308,7 +354,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
         const response = await fetch('/api/projects', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(projectForm),
+          body: JSON.stringify(projectData),
         })
 
         if (!response.ok) {
