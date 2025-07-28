@@ -104,7 +104,7 @@ export function HeaderEditor({ user, onUpdate }: HeaderEditorProps) {
           <div className="relative">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100">
               <Image
-                src={formData.avatar_url || clerkUser?.imageUrl || "/placeholder.svg"}
+                src={formData.avatar_url || clerkUser?.imageUrl || "https://via.placeholder.com/80x80/f3f4f6/9ca3af?text=Avatar"}
                 alt="Avatar"
                 width={80}
                 height={80}

@@ -184,24 +184,41 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     if (!isOwner) return
     
     try {
-      // TODO: Implement actual save to database
-      // For now, just update local state
       if (editingProject) {
         // Update existing project
+        const response = await fetch('/api/projects', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: editingProject.id,
+            ...projectForm
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to update project')
+        }
+
+        const { project } = await response.json()
         setEditableProjects(prev => prev.map(p => 
-          p.id === editingProject.id ? { ...editingProject, ...projectForm } : p
+          p.id === editingProject.id ? project : p
         ))
       } else {
         // Add new project
-        const newProject: Project = {
-          id: `temp-${Date.now()}`,
-          user_id: user.id,
-          ...projectForm,
-          image_path: null,
-          created_at: new Date().toISOString()
+        const response = await fetch('/api/projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(projectForm),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to create project')
         }
-        setEditableProjects(prev => [newProject, ...prev])
+
+        const { project } = await response.json()
+        setEditableProjects(prev => [project, ...prev])
       }
+      
       closeProjectModal()
     } catch (error) {
       console.error('Failed to save project:', error)
@@ -209,11 +226,23 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     }
   }
 
-  const deleteProject = (projectId: string) => {
+  const deleteProject = async (projectId: string) => {
     if (!isOwner) return
     if (confirm('Are you sure you want to delete this project?')) {
-      // TODO: Implement actual delete from database
-      setEditableProjects(prev => prev.filter(p => p.id !== projectId))
+      try {
+        const response = await fetch(`/api/projects?id=${projectId}`, {
+          method: 'DELETE',
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to delete project')
+        }
+
+        setEditableProjects(prev => prev.filter(p => p.id !== projectId))
+      } catch (error) {
+        console.error('Failed to delete project:', error)
+        alert('Failed to delete project. Please try again.')
+      }
     }
   }
 
@@ -251,24 +280,41 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     if (!isOwner) return
     
     try {
-      // TODO: Implement actual save to database
-      // For now, just update local state
       if (editingLink) {
         // Update existing link
+        const response = await fetch('/api/links', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: editingLink.id,
+            ...linkForm
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to update link')
+        }
+
+        const { link } = await response.json()
         setEditableLinks(prev => prev.map(l => 
-          l.id === editingLink.id ? { ...editingLink, ...linkForm } : l
+          l.id === editingLink.id ? link : l
         ))
       } else {
         // Add new link
-        const newLink: DatabaseLink = {
-          id: `temp-${Date.now()}`,
-          user_id: user.id,
-          ...linkForm,
-          show_preview: false,
-          created_at: new Date().toISOString()
+        const response = await fetch('/api/links', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(linkForm),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to create link')
         }
-        setEditableLinks(prev => [newLink, ...prev])
+
+        const { link } = await response.json()
+        setEditableLinks(prev => [link, ...prev])
       }
+      
       closeLinkModal()
     } catch (error) {
       console.error('Failed to save link:', error)
@@ -276,11 +322,23 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     }
   }
 
-  const deleteLink = (linkId: string) => {
+  const deleteLink = async (linkId: string) => {
     if (!isOwner) return
     if (confirm('Are you sure you want to delete this link?')) {
-      // TODO: Implement actual delete from database
-      setEditableLinks(prev => prev.filter(l => l.id !== linkId))
+      try {
+        const response = await fetch(`/api/links?id=${linkId}`, {
+          method: 'DELETE',
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to delete link')
+        }
+
+        setEditableLinks(prev => prev.filter(l => l.id !== linkId))
+      } catch (error) {
+        console.error('Failed to delete link:', error)
+        alert('Failed to delete link. Please try again.')
+      }
     }
   }
 
@@ -292,7 +350,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     if (project.image_path) {
       return [project.image_path]
     }
-    return ["/placeholder.svg?height=400&width=600&text=" + encodeURIComponent(project.title)]
+    return [`https://via.placeholder.com/600x400/f3f4f6/9ca3af?text=${encodeURIComponent(project.title)}`]
   }
 
   const nextImage = () => {
@@ -908,6 +966,23 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                 placeholder="React, TypeScript, Node.js (comma separated)"
                 className="w-full"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Project Images</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) => {
+                  // TODO: Implement image upload to Supabase storage
+                  console.log('Files selected:', e.target.files)
+                }}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Upload images for your project (multiple files supported)
+              </p>
             </div>
 
             <div className="flex items-center space-x-2">
