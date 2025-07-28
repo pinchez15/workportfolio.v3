@@ -92,6 +92,15 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
   // Check if current user owns this portfolio
   const isOwner = isSignedIn && clerkUser?.id === user.id
 
+  // Utility function to ensure URLs have proper protocol
+  const formatUrl = (url: string): string => {
+    if (!url) return url
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url
+    }
+    return `https://${url}`
+  }
+
   // Get featured and recent projects (use editable data)
   const currentProjects = isEditMode ? editableProjects : projects
   const featuredProject = currentProjects.find((p) => p.visible) || currentProjects[0]
@@ -178,14 +187,20 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     setIsAddingProject(true)
   }
 
+  // Convert database date (YYYY-MM-DD) back to month format (YYYY-MM)
+  const formatDateForForm = (dateStr: string) => {
+    if (!dateStr) return ''
+    return dateStr.substring(0, 7) // Convert "2025-02-01" to "2025-02"
+  }
+
   const openEditProject = (project: Project) => {
     setProjectForm({
       title: project.title,
       company: project.company || '',
       short_description: project.short_description || '',
       long_description: project.long_description || '',
-      start_date: project.start_date || '',
-      end_date: project.end_date || '',
+      start_date: formatDateForForm(project.start_date || ''),
+      end_date: formatDateForForm(project.end_date || ''),
       url: project.url || '',
       skills: project.skills || [],
       visible: project.visible,
@@ -623,7 +638,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
             {featuredProject ? (
               <Card
                 className="bg-white shadow-sm border-0 rounded-2xl overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200"
-                onClick={() => openProjectModal(featuredProject)}
+                onClick={() => isEditMode ? openEditProject(featuredProject) : openProjectModal(featuredProject)}
               >
               <div className="p-4">
                 {/* Image Grid - Mobile optimized */}
@@ -847,7 +862,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                     </CardContent>
                   </Card>
                 ) : (
-                  <Link key={link.id} href={link.url} target="_blank" rel="noopener noreferrer">
+                  <Link key={link.id} href={formatUrl(link.url)} target="_blank" rel="noopener noreferrer">
                     <Card className="bg-white shadow-sm border-0 rounded-xl overflow-hidden hover:shadow-md transition-all duration-200">
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-4">
@@ -1294,7 +1309,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                 {selectedProject.url && (
                   <div className="pt-4 border-t">
                     <Link
-                      href={selectedProject.url}
+                      href={formatUrl(selectedProject.url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center"

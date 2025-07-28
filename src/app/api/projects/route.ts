@@ -35,6 +35,12 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Convert month format (YYYY-MM) to first day of month for database
+    const formatDateForDb = (monthStr: string) => {
+      if (!monthStr) return null
+      return `${monthStr}-01` // Convert "2025-02" to "2025-02-01"
+    }
+
     // Insert project into database
     const { data, error } = await supabase
       .from('projects')
@@ -44,12 +50,12 @@ export async function POST(request: NextRequest) {
         company,
         short_description,
         long_description,
-        start_date: start_date || null,
-        end_date: end_date || null,
+        start_date: formatDateForDb(start_date),
+        end_date: formatDateForDb(end_date),
         url,
         skills,
         visible: visible !== false, // default to true
-        featured: featured || false,
+        // featured: featured || false, // TODO: Uncomment after migration
         image_path: null // TODO: Add image upload support
       })
       .select()
@@ -109,6 +115,12 @@ export async function PUT(request: NextRequest) {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Convert month format (YYYY-MM) to first day of month for database
+    const formatDateForDb = (monthStr: string) => {
+      if (!monthStr) return null
+      return `${monthStr}-01` // Convert "2025-02" to "2025-02-01"
+    }
+
     // Update project in database
     const { data, error } = await supabase
       .from('projects')
@@ -117,12 +129,12 @@ export async function PUT(request: NextRequest) {
         company,
         short_description,
         long_description,
-        start_date: start_date || null,
-        end_date: end_date || null,
+        start_date: formatDateForDb(start_date),
+        end_date: formatDateForDb(end_date),
         url,
         skills,
-        visible: visible !== false,
-        featured: featured || false
+        visible: visible !== false
+        // featured: featured || false // TODO: Uncomment after migration
       })
       .eq('id', id)
       .eq('user_id', userId) // Ensure user owns this project
