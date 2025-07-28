@@ -289,13 +289,27 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
         </div>
 
         {/* Featured Project - What I'm working on */}
-        {featuredProject && (
+        {(featuredProject || isEditMode) && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">What I'm working on</h2>
-            <Card
-              className="bg-white shadow-sm border-0 rounded-2xl overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200"
-              onClick={() => openProjectModal(featuredProject)}
-            >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">What I'm working on</h2>
+              {isEditMode && (
+                <Button
+                  onClick={() => {/* TODO: Add new project */}}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Project
+                </Button>
+              )}
+            </div>
+            
+            {featuredProject ? (
+              <Card
+                className="bg-white shadow-sm border-0 rounded-2xl overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200"
+                onClick={() => openProjectModal(featuredProject)}
+              >
               <div className="p-4">
                 {/* Image Grid - Mobile optimized */}
                 <div className="grid grid-cols-2 gap-2 mb-4 aspect-[4/3] rounded-xl overflow-hidden bg-gray-100">
@@ -319,13 +333,44 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                 </div>
               </div>
             </Card>
+            ) : isEditMode ? (
+              <Card className="bg-white shadow-sm border-0 rounded-2xl overflow-hidden border-dashed border-gray-300">
+                <div className="p-8 text-center">
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Plus className="w-6 h-6 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Add your first project</h3>
+                  <p className="text-gray-600 mb-4">Showcase your best work to visitors</p>
+                  <Button
+                    onClick={() => {/* TODO: Add new project */}}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Project
+                  </Button>
+                </div>
+              </Card>
+            ) : null}
           </div>
         )}
 
         {/* Recent Projects - List format */}
-        {recentProjects.length > 0 && (
+        {(recentProjects.length > 0 || isEditMode) && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent projects</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">Recent projects</h2>
+              {isEditMode && (
+                <Button
+                  onClick={() => {/* TODO: Add new project */}}
+                  size="sm"
+                  variant="outline"
+                  className="bg-transparent"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add
+                </Button>
+              )}
+            </div>
             <div className="space-y-3">
               {filteredRecentProjects.map((project) => (
                 <Card
@@ -353,9 +398,36 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                         <p className="text-xs text-gray-700 leading-relaxed line-clamp-2">{project.short_description}</p>
                       </div>
 
-                      {/* View indicator */}
+                      {/* View indicator or Edit buttons */}
                       <div className="flex-shrink-0">
-                        <ArrowRight className="h-4 w-4 text-gray-400" />
+                        {isEditMode ? (
+                          <div className="flex items-center space-x-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                // TODO: Edit project
+                              }}
+                              className="p-1 h-8 w-8"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                // TODO: Delete project
+                              }}
+                              className="p-1 h-8 w-8 text-red-600 hover:text-red-700"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <ArrowRight className="h-4 w-4 text-gray-400" />
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -409,13 +481,26 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
         )}
 
         {/* Links Section - Moved to bottom */}
-        {portfolio.show_links && links.length > 0 && (
+        {((portfolio.show_links && links.length > 0) || isEditMode) && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Links</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">Links</h2>
+              {isEditMode && (
+                <Button
+                  onClick={() => {/* TODO: Add new link */}}
+                  size="sm"
+                  variant="outline"
+                  className="bg-transparent"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Link
+                </Button>
+              )}
+            </div>
             <div className="space-y-3">
-              {links.map((link) => (
-                <Link key={link.id} href={link.url} target="_blank" rel="noopener noreferrer">
-                  <Card className="bg-white shadow-sm border-0 rounded-xl overflow-hidden hover:shadow-md transition-all duration-200">
+              {(isEditMode ? editableLinks : links).map((link) => (
+                isEditMode ? (
+                  <Card key={link.id} className="bg-white shadow-sm border-0 rounded-xl overflow-hidden hover:shadow-md transition-all duration-200">
                     <CardContent className="p-4">
                       <div className="flex items-center space-x-4">
                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0">
@@ -425,12 +510,66 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                           <h3 className="font-semibold text-gray-900 text-sm mb-1">{link.title}</h3>
                           {link.description && <p className="text-xs text-gray-600">{link.description}</p>}
                         </div>
-                        <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        <div className="flex items-center space-x-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {/* TODO: Edit link */}}
+                            className="p-1 h-8 w-8"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {/* TODO: Delete link */}}
+                            className="p-1 h-8 w-8 text-red-600 hover:text-red-700"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
-                </Link>
+                ) : (
+                  <Link key={link.id} href={link.url} target="_blank" rel="noopener noreferrer">
+                    <Card className="bg-white shadow-sm border-0 rounded-xl overflow-hidden hover:shadow-md transition-all duration-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0">
+                            {getIcon(link.icon || "ExternalLink")}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-gray-900 text-sm mb-1">{link.title}</h3>
+                            {link.description && <p className="text-xs text-gray-600">{link.description}</p>}
+                          </div>
+                          <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                )
               ))}
+              
+              {isEditMode && editableLinks.length === 0 && (
+                <Card className="bg-white shadow-sm border-0 rounded-xl overflow-hidden border-dashed border-gray-300">
+                  <div className="p-6 text-center">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Plus className="w-5 h-5 text-gray-400" />
+                    </div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-1">Add your first link</h3>
+                    <p className="text-xs text-gray-600 mb-3">Share your social profiles or website</p>
+                    <Button
+                      onClick={() => {/* TODO: Add new link */}}
+                      size="sm"
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add Link
+                    </Button>
+                  </div>
+                </Card>
+              )}
             </div>
           </div>
         )}
