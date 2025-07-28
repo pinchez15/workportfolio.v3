@@ -34,15 +34,14 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
     notFound()
   }
 
-  // Create a mock portfolio since we don't have portfolios table data yet
+  // No portfolio table needed - use user data directly
   const portfolio = {
-    id: "mock-portfolio",
+    id: user.id,
     user_id: user.id,
     title: `${user.name || user.username}'s Portfolio`,
     slug: user.username,
     bio: user.bio,
-    calendly_url: undefined,
-    show_links: true,
+    calendly_url: user.calendly_url || undefined,
     created_at: user.created_at
   }
 

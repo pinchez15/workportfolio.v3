@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useState, useEffect } from "react"
-import { useUser } from "@clerk/nextjs"
+import { useUser, UserButton } from "@clerk/nextjs"
 import type { User, Portfolio, Project, Link as DatabaseLink } from "@/types/database"
 
 interface PortfolioClientProps {
@@ -51,6 +51,30 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
   const [editableUser, setEditableUser] = useState<User>(user)
   const [editableProjects, setEditableProjects] = useState<Project[]>(projects)
   const [editableLinks, setEditableLinks] = useState<DatabaseLink[]>(links)
+  
+  // Project editing states
+  const [isAddingProject, setIsAddingProject] = useState(false)
+  const [editingProject, setEditingProject] = useState<Project | null>(null)
+  const [projectForm, setProjectForm] = useState({
+    title: '',
+    company: '',
+    short_description: '',
+    long_description: '',
+    url: '',
+    skills: [] as string[],
+    visible: true
+  })
+
+  // Link editing states
+  const [isAddingLink, setIsAddingLink] = useState(false)
+  const [editingLink, setEditingLink] = useState<DatabaseLink | null>(null)
+  const [linkForm, setLinkForm] = useState({
+    title: '',
+    url: '',
+    description: '',
+    icon: 'ExternalLink',
+    visible: true
+  })
 
   // Check if current user owns this portfolio
   const isOwner = isSignedIn && clerkUser?.id === user.id
@@ -122,6 +146,144 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     }
   }
 
+  // Project management functions
+  const openAddProject = () => {
+    setProjectForm({
+      title: '',
+      company: '',
+      short_description: '',
+      long_description: '',
+      url: '',
+      skills: [],
+      visible: true
+    })
+    setEditingProject(null)
+    setIsAddingProject(true)
+  }
+
+  const openEditProject = (project: Project) => {
+    setProjectForm({
+      title: project.title,
+      company: project.company || '',
+      short_description: project.short_description || '',
+      long_description: project.long_description || '',
+      url: project.url || '',
+      skills: project.skills || [],
+      visible: project.visible
+    })
+    setEditingProject(project)
+    setIsAddingProject(true)
+  }
+
+  const closeProjectModal = () => {
+    setIsAddingProject(false)
+    setEditingProject(null)
+  }
+
+  const saveProject = async () => {
+    if (!isOwner) return
+    
+    try {
+      // TODO: Implement actual save to database
+      // For now, just update local state
+      if (editingProject) {
+        // Update existing project
+        setEditableProjects(prev => prev.map(p => 
+          p.id === editingProject.id ? { ...editingProject, ...projectForm } : p
+        ))
+      } else {
+        // Add new project
+        const newProject: Project = {
+          id: `temp-${Date.now()}`,
+          user_id: user.id,
+          ...projectForm,
+          image_path: null,
+          created_at: new Date().toISOString()
+        }
+        setEditableProjects(prev => [newProject, ...prev])
+      }
+      closeProjectModal()
+    } catch (error) {
+      console.error('Failed to save project:', error)
+      alert('Failed to save project. Please try again.')
+    }
+  }
+
+  const deleteProject = (projectId: string) => {
+    if (!isOwner) return
+    if (confirm('Are you sure you want to delete this project?')) {
+      // TODO: Implement actual delete from database
+      setEditableProjects(prev => prev.filter(p => p.id !== projectId))
+    }
+  }
+
+  // Link management functions
+  const openAddLink = () => {
+    setLinkForm({
+      title: '',
+      url: '',
+      description: '',
+      icon: 'ExternalLink',
+      visible: true
+    })
+    setEditingLink(null)
+    setIsAddingLink(true)
+  }
+
+  const openEditLink = (link: DatabaseLink) => {
+    setLinkForm({
+      title: link.title,
+      url: link.url,
+      description: link.description || '',
+      icon: link.icon || 'ExternalLink',
+      visible: link.visible
+    })
+    setEditingLink(link)
+    setIsAddingLink(true)
+  }
+
+  const closeLinkModal = () => {
+    setIsAddingLink(false)
+    setEditingLink(null)
+  }
+
+  const saveLink = async () => {
+    if (!isOwner) return
+    
+    try {
+      // TODO: Implement actual save to database
+      // For now, just update local state
+      if (editingLink) {
+        // Update existing link
+        setEditableLinks(prev => prev.map(l => 
+          l.id === editingLink.id ? { ...editingLink, ...linkForm } : l
+        ))
+      } else {
+        // Add new link
+        const newLink: DatabaseLink = {
+          id: `temp-${Date.now()}`,
+          user_id: user.id,
+          ...linkForm,
+          show_preview: false,
+          created_at: new Date().toISOString()
+        }
+        setEditableLinks(prev => [newLink, ...prev])
+      }
+      closeLinkModal()
+    } catch (error) {
+      console.error('Failed to save link:', error)
+      alert('Failed to save link. Please try again.')
+    }
+  }
+
+  const deleteLink = (linkId: string) => {
+    if (!isOwner) return
+    if (confirm('Are you sure you want to delete this link?')) {
+      // TODO: Implement actual delete from database
+      setEditableLinks(prev => prev.filter(l => l.id !== linkId))
+    }
+  }
+
   // Get project images - use image_paths if available, otherwise fall back to image_path
   const getProjectImages = (project: Project): string[] => {
     if (project.image_paths && project.image_paths.length > 0) {
@@ -174,7 +336,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
             <Link href="/" className="text-lg font-semibold text-blue-600">
               WorkPortfolio
             </Link>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               {isOwner && !isEditMode && (
                 <Button
                   onClick={enterEditMode}
@@ -208,12 +370,22 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                   </Button>
                 </>
               )}
-              {!isOwner && (
+              {!isOwner && !isSignedIn && (
                 <Link href="/">
                   <Button variant="outline" size="sm" className="text-sm bg-transparent">
                     Create Portfolio
                   </Button>
                 </Link>
+              )}
+              {/* Always show user button if signed in */}
+              {isSignedIn && (
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-8 h-8"
+                    }
+                  }}
+                />
               )}
             </div>
           </div>
@@ -295,7 +467,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
               <h2 className="text-xl font-semibold text-gray-900">What I'm working on</h2>
               {isEditMode && (
                 <Button
-                  onClick={() => {/* TODO: Add new project */}}
+                  onClick={openAddProject}
                   size="sm"
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
@@ -342,7 +514,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Add your first project</h3>
                   <p className="text-gray-600 mb-4">Showcase your best work to visitors</p>
                   <Button
-                    onClick={() => {/* TODO: Add new project */}}
+                    onClick={openAddProject}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <Plus className="w-4 h-4 mr-1" />
@@ -361,7 +533,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
               <h2 className="text-xl font-semibold text-gray-900">Recent projects</h2>
               {isEditMode && (
                 <Button
-                  onClick={() => {/* TODO: Add new project */}}
+                  onClick={openAddProject}
                   size="sm"
                   variant="outline"
                   className="bg-transparent"
@@ -407,7 +579,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                               variant="ghost"
                               onClick={(e) => {
                                 e.stopPropagation()
-                                // TODO: Edit project
+                                openEditProject(project)
                               }}
                               className="p-1 h-8 w-8"
                             >
@@ -418,7 +590,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                               variant="ghost"
                               onClick={(e) => {
                                 e.stopPropagation()
-                                // TODO: Delete project
+                                deleteProject(project.id)
                               }}
                               className="p-1 h-8 w-8 text-red-600 hover:text-red-700"
                             >
@@ -481,13 +653,13 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
         )}
 
         {/* Links Section - Moved to bottom */}
-        {((portfolio.show_links && links.length > 0) || isEditMode) && (
+        {(links.length > 0 || isEditMode) && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">Links</h2>
               {isEditMode && (
                 <Button
-                  onClick={() => {/* TODO: Add new link */}}
+                  onClick={openAddLink}
                   size="sm"
                   variant="outline"
                   className="bg-transparent"
@@ -514,7 +686,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => {/* TODO: Edit link */}}
+                            onClick={() => openEditLink(link)}
                             className="p-1 h-8 w-8"
                           >
                             <Edit className="h-4 w-4" />
@@ -522,7 +694,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => {/* TODO: Delete link */}}
+                            onClick={() => deleteLink(link.id)}
                             className="p-1 h-8 w-8 text-red-600 hover:text-red-700"
                           >
                             <X className="h-4 w-4" />
@@ -560,7 +732,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                     <h3 className="text-sm font-medium text-gray-900 mb-1">Add your first link</h3>
                     <p className="text-xs text-gray-600 mb-3">Share your social profiles or website</p>
                     <Button
-                      onClick={() => {/* TODO: Add new link */}}
+                      onClick={openAddLink}
                       size="sm"
                       className="bg-blue-600 hover:bg-blue-700 text-white"
                     >
@@ -575,7 +747,203 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
         )}
       </main>
 
-      {/* Project Modal */}
+      {/* Link Edit/Add Modal */}
+      <Dialog open={isAddingLink} onOpenChange={closeLinkModal}>
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900">
+              {editingLink ? 'Edit Link' : 'Add New Link'}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Link Title</label>
+              <Input
+                value={linkForm.title}
+                onChange={(e) => setLinkForm(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="e.g. LinkedIn Profile, GitHub, Website"
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
+              <Input
+                value={linkForm.url}
+                onChange={(e) => setLinkForm(prev => ({ ...prev, url: e.target.value }))}
+                placeholder="https://example.com"
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
+              <Input
+                value={linkForm.description}
+                onChange={(e) => setLinkForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Brief description of this link"
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Icon</label>
+              <select
+                value={linkForm.icon}
+                onChange={(e) => setLinkForm(prev => ({ ...prev, icon: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="ExternalLink">External Link</option>
+                <option value="Github">GitHub</option>
+                <option value="Linkedin">LinkedIn</option>
+                <option value="Mail">Email</option>
+                <option value="Youtube">YouTube</option>
+              </select>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="linkVisible"
+                checked={linkForm.visible}
+                onChange={(e) => setLinkForm(prev => ({ ...prev, visible: e.target.checked }))}
+                className="rounded border-gray-300"
+              />
+              <label htmlFor="linkVisible" className="text-sm text-gray-700">
+                Make this link visible to visitors
+              </label>
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4 border-t">
+              <Button
+                onClick={closeLinkModal}
+                variant="outline"
+                className="bg-transparent"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={saveLink}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={!linkForm.title.trim() || !linkForm.url.trim()}
+              >
+                {editingLink ? 'Update Link' : 'Add Link'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Project Edit/Add Modal */}
+      <Dialog open={isAddingProject} onOpenChange={closeProjectModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900">
+              {editingProject ? 'Edit Project' : 'Add New Project'}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
+              <Input
+                value={projectForm.title}
+                onChange={(e) => setProjectForm(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Enter project title"
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+              <Input
+                value={projectForm.company}
+                onChange={(e) => setProjectForm(prev => ({ ...prev, company: e.target.value }))}
+                placeholder="Company or organization"
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
+              <Textarea
+                value={projectForm.short_description}
+                onChange={(e) => setProjectForm(prev => ({ ...prev, short_description: e.target.value }))}
+                placeholder="Brief description for project cards"
+                rows={2}
+                className="w-full resize-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Detailed Description</label>
+              <Textarea
+                value={projectForm.long_description}
+                onChange={(e) => setProjectForm(prev => ({ ...prev, long_description: e.target.value }))}
+                placeholder="Detailed description for project modal"
+                rows={4}
+                className="w-full resize-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Project URL</label>
+              <Input
+                value={projectForm.url}
+                onChange={(e) => setProjectForm(prev => ({ ...prev, url: e.target.value }))}
+                placeholder="https://your-project.com"
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Skills/Technologies</label>
+              <Input
+                value={projectForm.skills.join(', ')}
+                onChange={(e) => setProjectForm(prev => ({ 
+                  ...prev, 
+                  skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                }))}
+                placeholder="React, TypeScript, Node.js (comma separated)"
+                className="w-full"
+              />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="visible"
+                checked={projectForm.visible}
+                onChange={(e) => setProjectForm(prev => ({ ...prev, visible: e.target.checked }))}
+                className="rounded border-gray-300"
+              />
+              <label htmlFor="visible" className="text-sm text-gray-700">
+                Make this project visible to visitors
+              </label>
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4 border-t">
+              <Button
+                onClick={closeProjectModal}
+                variant="outline"
+                className="bg-transparent"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={saveProject}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={!projectForm.title.trim()}
+              >
+                {editingProject ? 'Update Project' : 'Add Project'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Project View Modal */}
       <Dialog open={!!selectedProject} onOpenChange={() => setSelectedProject(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           {selectedProject && (

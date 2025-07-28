@@ -1,6 +1,6 @@
 /**
  * Generate a consistent username from user data
- * Priority: firstName.lastName > username > email_prefix > user_id_fallback
+ * Priority: firstName_lastName > username > email_prefix > user_id_fallback
  */
 export function generateUsername(userData: {
   first_name?: string | null;
@@ -10,12 +10,12 @@ export function generateUsername(userData: {
   email_addresses?: Array<{ email_address: string }>;
   id: string;
 }): string {
-  // Priority 1: firstName.lastName
+  // Priority 1: firstName_lastName
   if (userData.first_name && userData.last_name) {
     const firstName = userData.first_name.toLowerCase().replace(/[^a-z0-9]/g, '');
     const lastName = userData.last_name.toLowerCase().replace(/[^a-z0-9]/g, '');
     if (firstName && lastName) {
-      return `${firstName}.${lastName}`;
+      return `${firstName}_${lastName}`;
     }
   }
 

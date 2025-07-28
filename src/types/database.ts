@@ -5,6 +5,7 @@ export interface User {
   title?: string;
   avatar_url?: string;
   bio?: string;
+  calendly_url?: string;
   social_links?: {
     linkedin?: string;
     github?: string;
@@ -50,7 +51,6 @@ export interface Portfolio {
   slug: string;
   bio: string;
   calendly_url?: string;
-  show_links: boolean;
   created_at: string;
 }
 
@@ -71,11 +71,6 @@ export interface Database {
         Row: Link;
         Insert: Omit<Link, 'id' | 'created_at'>;
         Update: Partial<Omit<Link, 'id' | 'created_at'>>;
-      };
-      portfolios: {
-        Row: Portfolio;
-        Insert: Omit<Portfolio, 'id' | 'created_at'>;
-        Update: Partial<Omit<Portfolio, 'id' | 'created_at'>>;
       };
     };
   };
