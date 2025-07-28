@@ -304,23 +304,39 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     try {
       let imagePaths: string[] = []
 
-      // Upload images if any are selected
+      // Upload images if any are selected (one by one to avoid size limits)
       if (uploadedFiles.length > 0) {
-        const formData = new FormData()
-        uploadedFiles.forEach(file => {
-          formData.append('files', file)
+        const uploadPromises = uploadedFiles.map(async (file) => {
+          const formData = new FormData()
+          formData.append('file', file)
+
+          try {
+            const uploadResponse = await fetch('/api/upload/images', {
+              method: 'POST',
+              body: formData,
+            })
+
+            if (uploadResponse.ok) {
+              const { file: uploadedFile } = await uploadResponse.json()
+              return uploadedFile.url
+            } else {
+              const errorData = await uploadResponse.json()
+              console.warn(`Failed to upload ${file.name}:`, errorData.error)
+              return null
+            }
+          } catch (error) {
+            console.warn(`Failed to upload ${file.name}:`, error)
+            return null
+          }
         })
 
-        const uploadResponse = await fetch('/api/upload/images', {
-          method: 'POST',
-          body: formData,
-        })
-
-        if (uploadResponse.ok) {
-          const { files } = await uploadResponse.json()
-          imagePaths = files.map((f: { url: string }) => f.url)
-        } else {
-          console.warn('Image upload failed, continuing without images')
+        const uploadResults = await Promise.all(uploadPromises)
+        imagePaths = uploadResults.filter(url => url !== null) as string[]
+        
+        if (imagePaths.length === 0 && uploadedFiles.length > 0) {
+          alert('All image uploads failed. The project will be saved without images.')
+        } else if (imagePaths.length < uploadedFiles.length) {
+          alert(`${uploadedFiles.length - imagePaths.length} image(s) failed to upload. The project will be saved with the successful uploads.`)
         }
       }
 
