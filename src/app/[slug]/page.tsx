@@ -41,7 +41,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
     title: `${user.name || user.username}'s Portfolio`,
     slug: user.username,
     bio: user.bio,
-    calendly_url: null,
+    calendly_url: undefined,
     show_links: true,
     created_at: user.created_at
   }
