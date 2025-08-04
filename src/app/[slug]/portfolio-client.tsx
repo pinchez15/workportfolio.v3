@@ -551,7 +551,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     <div className="min-h-screen bg-gray-50">
       {/* Simplified Header */}
       <header className="bg-white border-b border-gray-200">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
             <Link href="/" className="text-lg font-semibold text-blue-600">
               WorkPortfolio
@@ -612,7 +612,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Hero Section - Editable */}
         <div className="bg-white rounded-2xl p-6 sm:p-8 mb-8 shadow-sm">
           <div className="flex items-start space-x-4">
@@ -763,37 +763,30 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                 </Button>
               )}
             </div>
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {filteredRecentProjects.map((project) => (
                 <Card
                   key={project.id}
                   className="bg-white shadow-sm border-0 rounded-xl overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200"
                   onClick={() => openProjectModal(project)}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start space-x-4">
-                      {/* Project thumbnail */}
-                      <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                        <img
-                          src={getProjectImages(project)[0]}
-                          alt={`${project.title} thumbnail`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+                  <CardContent className="p-0">
+                    {/* Project image - larger on desktop */}
+                    <div className="md:h-48 h-32 bg-gray-100 overflow-hidden">
+                      <img
+                        src={getProjectImages(project)[0]}
+                        alt={`${project.title} preview`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
 
-                      {/* Project info */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 text-sm mb-1 truncate">{project.title}</h3>
-                        <p className="text-xs text-gray-600 mb-1">
-                          {project.company}, {formatDate(project.created_at)}
-                        </p>
-                        <p className="text-xs text-gray-700 leading-relaxed line-clamp-2 whitespace-pre-wrap">{project.short_description}</p>
-                      </div>
-
-                      {/* View indicator or Edit buttons */}
-                      <div className="flex-shrink-0">
+                    {/* Project info */}
+                    <div className="p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-semibold text-gray-900 text-base mb-1 flex-1 min-w-0 pr-2">{project.title}</h3>
+                        {/* Edit buttons or view indicator */}
                         {isEditMode ? (
-                          <div className="flex items-center space-x-1">
+                          <div className="flex items-center space-x-1 flex-shrink-0">
                             <Button
                               size="sm"
                               variant="ghost"
@@ -801,9 +794,9 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                                 e.stopPropagation()
                                 openEditProject(project)
                               }}
-                              className="p-1 h-8 w-8"
+                              className="p-1 h-7 w-7"
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit className="h-3 w-3" />
                             </Button>
                             <Button
                               size="sm"
@@ -812,15 +805,20 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                                 e.stopPropagation()
                                 deleteProject(project.id)
                               }}
-                              className="p-1 h-8 w-8 text-red-600 hover:text-red-700"
+                              className="p-1 h-7 w-7 text-red-600 hover:text-red-700"
                             >
-                              <X className="h-4 w-4" />
+                              <X className="h-3 w-3" />
                             </Button>
                           </div>
                         ) : (
-                          <ArrowRight className="h-4 w-4 text-gray-400" />
+                          <ArrowRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
                         )}
                       </div>
+                      
+                      <p className="text-sm text-gray-600 mb-2">
+                        {project.company} • {formatDate(project.created_at)}
+                      </p>
+                      <p className="text-sm text-gray-700 leading-relaxed line-clamp-3 whitespace-pre-wrap">{project.short_description}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -1391,7 +1389,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
       {/* Simplified Footer */}
       <footer className="bg-white border-t border-gray-200 py-6">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
             <p className="text-xs text-gray-500">
               Created with{" "}
