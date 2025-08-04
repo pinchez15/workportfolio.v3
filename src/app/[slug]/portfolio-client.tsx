@@ -969,7 +969,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
       {/* Link Edit/Add Modal */}
       <Dialog open={isAddingLink} onOpenChange={closeLinkModal}>
-        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto sm:max-w-xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900">
               {editingLink ? 'Edit Link' : 'Add New Link'}
@@ -1057,7 +1057,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
       {/* Project Edit/Add Modal */}
       <Dialog open={isAddingProject} onOpenChange={closeProjectModal}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto sm:max-w-4xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900">
               {editingProject ? 'Edit Project' : 'Add New Project'}
@@ -1294,7 +1294,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
       {/* Project View Modal */}
       <Dialog open={!!selectedProject} onOpenChange={() => setSelectedProject(null)}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto sm:max-w-6xl">
           {selectedProject && (
             <>
               <DialogHeader>
