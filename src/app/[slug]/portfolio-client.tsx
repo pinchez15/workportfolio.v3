@@ -38,6 +38,42 @@ const getIcon = (iconName: string) => {
   }
 }
 
+// Helper function to render formatted text
+const renderFormattedText = (text: string) => {
+  if (!text) return '';
+  
+  // Convert markdown-like syntax to HTML
+  let formattedText = text
+    // Bold: **text** -> <strong>text</strong>
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // Italic: *text* -> <em>text</em>
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    // Underline: __text__ -> <u>text</u>
+    .replace(/__(.*?)__/g, '<u>$1</u>')
+    // Convert line breaks to <br> tags
+    .replace(/\n/g, '<br>');
+  
+  // Handle bullet points and numbered lists line by line
+  const lines = text.split('\n');
+  const formattedLines = lines.map(line => {
+    if (line.trim().startsWith('• ')) {
+      return `<li>${line.trim().substring(2)}</li>`;
+    }
+    if (/^\d+\.\s/.test(line.trim())) {
+      return `<li>${line.trim().replace(/^\d+\.\s/, '')}</li>`;
+    }
+    return line;
+  });
+  
+  // Join lines and wrap lists in <ul> tags
+  formattedText = formattedLines.join('<br>');
+  if (formattedText.includes('<li>')) {
+    formattedText = formattedText.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
+  }
+  
+  return formattedText;
+}
+
 export function PortfolioClient({ user, portfolio, projects, links, allSkills }: PortfolioClientProps) {
   const { user: clerkUser, isSignedIn } = useUser()
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
@@ -91,6 +127,104 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
   // Check if current user owns this portfolio
   const isOwner = isSignedIn && clerkUser?.id === user.id
+
+  // Keyboard shortcuts for rich text formatting
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle shortcuts when the project modal is open
+      if (!isAddingProject) return;
+      
+      const textarea = document.getElementById('long-description') as HTMLTextAreaElement;
+      if (!textarea || document.activeElement !== textarea) return;
+      
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        
+        switch (e.key.toLowerCase()) {
+          case 'b':
+            // Bold
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const before = text.substring(0, start);
+            const selected = text.substring(start, end);
+            const after = text.substring(end);
+            
+            if (start === end) {
+              const newText = before + '**bold text**' + after;
+              setProjectForm(prev => ({ ...prev, long_description: newText }));
+              setTimeout(() => {
+                textarea.focus();
+                textarea.setSelectionRange(start + 2, start + 10);
+              }, 0);
+            } else {
+              const newText = before + '**' + selected + '**' + after;
+              setProjectForm(prev => ({ ...prev, long_description: newText }));
+              setTimeout(() => {
+                textarea.focus();
+                textarea.setSelectionRange(start, start + selected.length + 4);
+              }, 0);
+            }
+            break;
+            
+          case 'i':
+            // Italic
+            const startI = textarea.selectionStart;
+            const endI = textarea.selectionEnd;
+            const textI = textarea.value;
+            const beforeI = textI.substring(0, startI);
+            const selectedI = textI.substring(startI, endI);
+            const afterI = textI.substring(endI);
+            
+            if (startI === endI) {
+              const newText = beforeI + '*italic text*' + afterI;
+              setProjectForm(prev => ({ ...prev, long_description: newText }));
+              setTimeout(() => {
+                textarea.focus();
+                textarea.setSelectionRange(startI + 1, startI + 12);
+              }, 0);
+            } else {
+              const newText = beforeI + '*' + selectedI + '*' + afterI;
+              setProjectForm(prev => ({ ...prev, long_description: newText }));
+              setTimeout(() => {
+                textarea.focus();
+                textarea.setSelectionRange(startI, startI + selectedI.length + 2);
+              }, 0);
+            }
+            break;
+            
+          case 'u':
+            // Underline
+            const startU = textarea.selectionStart;
+            const endU = textarea.selectionEnd;
+            const textU = textarea.value;
+            const beforeU = textU.substring(0, startU);
+            const selectedU = textU.substring(startU, endU);
+            const afterU = textU.substring(endU);
+            
+            if (startU === endU) {
+              const newText = beforeU + '__underline text__' + afterU;
+              setProjectForm(prev => ({ ...prev, long_description: newText }));
+              setTimeout(() => {
+                textarea.focus();
+                textarea.setSelectionRange(startU + 2, startU + 15);
+              }, 0);
+            } else {
+              const newText = beforeU + '__' + selectedU + '__' + afterU;
+              setProjectForm(prev => ({ ...prev, long_description: newText }));
+              setTimeout(() => {
+                textarea.focus();
+                textarea.setSelectionRange(startU, startU + selectedU.length + 4);
+              }, 0);
+            }
+            break;
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isAddingProject]);
 
   // Utility function to ensure URLs have proper protocol
   const formatUrl = (url: string): string => {
@@ -1096,10 +1230,188 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Detailed Description</label>
+              
+              {/* Rich Text Formatting Toolbar */}
+              <div className="mb-2 flex items-center gap-1 p-2 bg-gray-50 border border-gray-200 rounded-md">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const textarea = document.getElementById('long-description') as HTMLTextAreaElement;
+                    if (textarea) {
+                      const start = textarea.selectionStart;
+                      const end = textarea.selectionEnd;
+                      const text = textarea.value;
+                      const before = text.substring(0, start);
+                      const selected = text.substring(start, end);
+                      const after = text.substring(end);
+                      
+                      if (start === end) {
+                        // No text selected, insert **bold** markers
+                        const newText = before + '**bold text**' + after;
+                        setProjectForm(prev => ({ ...prev, long_description: newText }));
+                        // Set cursor position after the markers
+                        setTimeout(() => {
+                          textarea.focus();
+                          textarea.setSelectionRange(start + 2, start + 10);
+                        }, 0);
+                      } else {
+                        // Text selected, wrap with **
+                        const newText = before + '**' + selected + '**' + after;
+                        setProjectForm(prev => ({ ...prev, long_description: newText }));
+                        // Set cursor position after the wrapped text
+                        setTimeout(() => {
+                          textarea.focus();
+                          textarea.setSelectionRange(start, start + selected.length + 4);
+                        }, 0);
+                      }
+                    }
+                  }}
+                  className="p-2 hover:bg-gray-200 rounded text-sm font-bold border border-transparent hover:border-gray-300 transition-colors"
+                  title="Bold (Ctrl+B)"
+                >
+                  B
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => {
+                    const textarea = document.getElementById('long-description') as HTMLTextAreaElement;
+                    if (textarea) {
+                      const start = textarea.selectionStart;
+                      const end = textarea.selectionEnd;
+                      const text = textarea.value;
+                      const before = text.substring(0, start);
+                      const selected = text.substring(start, end);
+                      const after = text.substring(end);
+                      
+                      if (start === end) {
+                        // No text selected, insert *italic* markers
+                        const newText = before + '*italic text*' + after;
+                        setProjectForm(prev => ({ ...prev, long_description: newText }));
+                        // Set cursor position after the markers
+                        setTimeout(() => {
+                          textarea.focus();
+                          textarea.setSelectionRange(start + 1, start + 12);
+                        }, 0);
+                      } else {
+                        // Text selected, wrap with *
+                        const newText = before + '*' + selected + '*' + after;
+                        setProjectForm(prev => ({ ...prev, long_description: newText }));
+                        // Set cursor position after the wrapped text
+                        setTimeout(() => {
+                          textarea.focus();
+                          textarea.setSelectionRange(start, start + selected.length + 2);
+                        }, 0);
+                      }
+                    }
+                  }}
+                  className="p-2 hover:bg-gray-200 rounded text-sm italic border border-transparent hover:border-gray-300 transition-colors"
+                  title="Italic (Ctrl+I)"
+                >
+                  I
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => {
+                    const textarea = document.getElementById('long-description') as HTMLTextAreaElement;
+                    if (textarea) {
+                      const start = textarea.selectionStart;
+                      const end = textarea.selectionEnd;
+                      const text = textarea.value;
+                      const before = text.substring(0, start);
+                      const selected = text.substring(start, end);
+                      const after = text.substring(end);
+                      
+                      if (start === end) {
+                        // No text selected, insert __underline__ markers
+                        const newText = before + '__underline text__' + after;
+                        setProjectForm(prev => ({ ...prev, long_description: newText }));
+                        // Set cursor position after the markers
+                        setTimeout(() => {
+                          textarea.focus();
+                          textarea.setSelectionRange(start + 2, start + 15);
+                        }, 0);
+                      } else {
+                        // Text selected, wrap with __
+                        const newText = before + '__' + selected + '__' + after;
+                        setProjectForm(prev => ({ ...prev, long_description: newText }));
+                        // Set cursor position after the wrapped text
+                        setTimeout(() => {
+                          textarea.focus();
+                          textarea.setSelectionRange(start, start + selected.length + 4);
+                        }, 0);
+                      }
+                    }
+                  }}
+                  className="p-2 hover:bg-gray-200 rounded text-sm underline border border-transparent hover:border-gray-300 transition-colors"
+                  title="Underline (Ctrl+U)"
+                >
+                  U
+                </button>
+                
+                <div className="w-px h-6 bg-gray-300 mx-2"></div>
+                
+                <button
+                  type="button"
+                  onClick={() => {
+                    const textarea = document.getElementById('long-description') as HTMLTextAreaElement;
+                    if (textarea) {
+                      const start = textarea.selectionStart;
+                      const text = textarea.value;
+                      const before = text.substring(0, start);
+                      const after = text.substring(start);
+                      const newText = before + '• ' + after;
+                      setProjectForm(prev => ({ ...prev, long_description: newText }));
+                      // Set cursor position after the bullet
+                      setTimeout(() => {
+                        textarea.focus();
+                        textarea.setSelectionRange(start + 2, start + 2);
+                      }, 0);
+                    }
+                  }}
+                  className="p-2 hover:bg-gray-200 rounded text-sm border border-transparent hover:border-gray-300 transition-colors"
+                  title="Add bullet point"
+                >
+                  •
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => {
+                    const textarea = document.getElementById('long-description') as HTMLTextAreaElement;
+                    if (textarea) {
+                      const start = textarea.selectionStart;
+                      const text = textarea.value;
+                      const before = text.substring(0, start);
+                      const after = text.substring(start);
+                      const newText = before + '1. ' + after;
+                      setProjectForm(prev => ({ ...prev, long_description: newText }));
+                      // Set cursor position after the number
+                      setTimeout(() => {
+                        textarea.focus();
+                        textarea.setSelectionRange(start + 3, start + 3);
+                      }, 0);
+                    }
+                  }}
+                  className="p-2 hover:bg-gray-200 rounded text-sm border border-transparent hover:border-gray-300 transition-colors"
+                  title="Add numbered list"
+                >
+                  1.
+                </button>
+                
+                <div className="w-px h-6 bg-gray-300 mx-2"></div>
+                
+                <span className="text-xs text-gray-500 px-2">
+                  Use **bold**, *italic*, __underline__, • bullets, or 1. numbers
+                </span>
+              </div>
+              
               <Textarea
+                id="long-description"
                 value={projectForm.long_description}
                 onChange={(e) => setProjectForm(prev => ({ ...prev, long_description: e.target.value }))}
-                placeholder="Share as much as you'd like! Include outcomes, metrics and challenges if any."
+                placeholder="Share as much as you'd like! Include outcomes, metrics and challenges if any. Use the toolbar above for formatting."
                 rows={4}
                 className="w-full resize-none"
               />
@@ -1350,7 +1662,12 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                 {/* Project Details */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">About this project</h3>
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{selectedProject.long_description}</p>
+                  <div 
+                    className="text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{ 
+                      __html: renderFormattedText(selectedProject.long_description || '') 
+                    }}
+                  />
                 </div>
 
                 {selectedProject.skills && selectedProject.skills.length > 0 && (

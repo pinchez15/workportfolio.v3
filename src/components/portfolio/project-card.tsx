@@ -6,6 +6,43 @@ import { ChevronLeft, ChevronRight, X, Calendar, Building } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
+import { Project } from "@/types/database"
+
+// Helper function to render formatted text
+const renderFormattedText = (text: string) => {
+  if (!text) return '';
+  
+  // Convert markdown-like syntax to HTML
+  let formattedText = text
+    // Bold: **text** -> <strong>text</strong>
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // Italic: *text* -> <em>text</em>
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    // Underline: __text__ -> <u>text</u>
+    .replace(/__(.*?)__/g, '<u>$1</u>')
+    // Convert line breaks to <br> tags
+    .replace(/\n/g, '<br>');
+  
+  // Handle bullet points and numbered lists line by line
+  const lines = text.split('\n');
+  const formattedLines = lines.map(line => {
+    if (line.trim().startsWith('• ')) {
+      return `<li>${line.trim().substring(2)}</li>`;
+    }
+    if (/^\d+\.\s/.test(line.trim())) {
+      return `<li>${line.trim().replace(/^\d+\.\s/, '')}</li>`;
+    }
+    return line;
+  });
+  
+  // Join lines and wrap lists in <ul> tags
+  formattedText = formattedLines.join('<br>');
+  if (formattedText.includes('<li>')) {
+    formattedText = formattedText.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
+  }
+  
+  return formattedText;
+}
 
 interface ProjectCardProps {
   project: {
@@ -216,9 +253,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
               {project.long_description && (
                 <div>
                   <h4 className="font-semibold mb-2">Description</h4>
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {project.long_description}
-                  </p>
+                  <div 
+                    className="text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: renderFormattedText(project.long_description) }}
+                  />
                 </div>
               )}
               
