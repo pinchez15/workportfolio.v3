@@ -178,87 +178,77 @@ export default async function HomePage() {
                 </Link>
               </div>
 
-              {/* Social Proof */}
-              <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-8 pt-4">
-                <div className="flex items-center space-x-3">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div
-                        key={i}
-                        className="w-8 h-8 bg-blue-600 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-medium"
-                      >
-                        {String.fromCharCode(64 + i)}
-                      </div>
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-600">Join 2,000+ professionals</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                  ))}
-                  <span className="text-sm text-gray-600 ml-2">4.9/5</span>
-                </div>
-              </div>
             </div>
 
             {/* Right Content - Portfolio Preview */}
             <div className="relative mt-8 lg:mt-0">
               <div className="relative z-10">
                 <Card className="bg-white shadow-2xl rounded-2xl border-0 overflow-hidden">
-                  <CardContent className="p-8">
-                    <div className="flex items-center justify-between mb-8">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                          S
+                  <CardContent className="p-0">
+                    {/* Portfolio Header */}
+                    <div className="p-6 border-b border-gray-100">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                            S
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900 text-lg">Sarah Miller</h3>
+                            <p className="text-gray-600 mt-1">Product Designer</p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900 text-lg">Sarah Miller</h3>
-                          <p className="text-gray-600 mt-1">Product Designer</p>
-                        </div>
+                        <Badge className="bg-green-100 text-green-800 border-green-200 font-medium">LIVE</Badge>
                       </div>
-                      <Badge className="bg-green-100 text-green-800 border-green-200 font-medium">LIVE</Badge>
+                      <p className="text-gray-500 text-sm font-mono">workportfolio.io/sarah</p>
                     </div>
 
-                    <p className="text-gray-500 text-sm mb-8 font-mono">workportfolio.io/sarah</p>
-
-                    <div className="space-y-6">
-                      <div className="p-6 bg-gray-50 rounded-xl border border-gray-200">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-10 h-10 bg-blue-600 rounded-lg"></div>
-                            <div>
-                              <p className="font-semibold text-gray-900 mb-1">E-commerce Redesign</p>
-                              <p className="text-sm text-gray-600">Increased conversion by 34%</p>
+                    {/* Portfolio Content */}
+                    <div className="p-6">
+                      <div className="space-y-4">
+                        {/* Project 1 */}
+                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                <span className="text-white text-xs font-semibold">E</span>
+                              </div>
+                              <div>
+                                <p className="font-semibold text-gray-900 text-sm">E-commerce Redesign</p>
+                                <p className="text-xs text-gray-600">Increased conversion by 34%</p>
+                              </div>
                             </div>
+                            <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200 text-xs">
+                              LIVE
+                            </Badge>
                           </div>
-                          <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                            LIVE
-                          </Button>
+                        </div>
+
+                        {/* Project 2 */}
+                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                                <span className="text-white text-xs font-semibold">M</span>
+                              </div>
+                              <div>
+                                <p className="font-semibold text-gray-900 text-sm">Mobile App MVP</p>
+                                <p className="text-xs text-gray-600">Built in 4 minutes</p>
+                              </div>
+                            </div>
+                            <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-200 text-xs">
+                              VIEW
+                            </Badge>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="p-6 bg-gray-50 rounded-xl border border-gray-200">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-10 h-10 bg-green-500 rounded-lg"></div>
-                            <div>
-                              <p className="font-semibold text-gray-900 mb-1">Mobile App MVP</p>
-                              <p className="text-sm text-gray-600">0 to 10k users in 3 months</p>
-                            </div>
-                          </div>
-                          <Button variant="ghost" size="sm" className="text-green-500 hover:text-green-600">
-                            VIEW
-                          </Button>
-                        </div>
+                      {/* Portfolio Footer */}
+                      <div className="mt-6 pt-4 border-t border-gray-100">
+                        <p className="text-xs text-gray-500 flex items-center">
+                          <Zap className="w-3 h-3 mr-2" />
+                          Portfolio created in under 5 minutes
+                        </p>
                       </div>
-                    </div>
-
-                    <div className="mt-8 pt-6 border-t border-gray-100">
-                      <p className="text-xs text-gray-500 flex items-center">
-                        <Zap className="w-3 h-3 mr-2" />
-                        Built in 4 minutes
-                      </p>
                     </div>
                   </CardContent>
                 </Card>
