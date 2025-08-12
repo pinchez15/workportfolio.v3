@@ -311,7 +311,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
   // Get featured and recent projects (use editable data)
   const currentProjects = isEditMode ? editableProjects : projects
-  const featuredProject = currentProjects.find((p) => p.visible) || currentProjects[0]
+  const featuredProject = currentProjects.find((p) => p.visible && p.featured) || currentProjects.find((p) => p.visible) || currentProjects[0]
   const recentProjects = currentProjects.filter((p) => p.visible && p.id !== featuredProject?.id)
 
   // Filter projects based on selected skills
@@ -412,7 +412,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
       url: project.url || '',
       skills: project.skills || [],
       visible: project.visible,
-      featured: false // TODO: Add featured field to Project type
+      featured: project.featured || false
     })
     setEditingProject(project)
     setUploadedFiles([])
@@ -1671,24 +1671,69 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
               </div>
               
               {uploadedFiles.length > 0 && (
-                <div className="mt-3 space-y-2">
-                  {uploadedFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                      <div className="flex items-center">
-                        <FileImage className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-700">{file.name}</span>
-                        <span className="text-xs text-gray-500 ml-2">
-                          ({(file.size / 1024 / 1024).toFixed(1)} MB)
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => removeFile(index)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
+                <div className="mt-3">
+                  <p className="text-xs text-gray-500 mb-2">Drag to reorder images (first image will be the main project image)</p>
+                  <DragDropContext onDragEnd={(result) => {
+                    if (!result.destination) return;
+                    
+                    const items = Array.from(uploadedFiles);
+                    const [reorderedItem] = items.splice(result.source.index, 1);
+                    items.splice(result.destination.index, 0, reorderedItem);
+                    
+                    setUploadedFiles(items);
+                  }}>
+                    <Droppable droppableId="project-images">
+                      {(provided) => (
+                        <div 
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          className="space-y-2"
+                        >
+                          {uploadedFiles.map((file, index) => (
+                            <Draggable key={`${file.name}-${index}`} draggableId={`${file.name}-${index}`} index={index}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className={`flex items-center justify-between p-2 bg-gray-50 rounded ${
+                                    snapshot.isDragging ? 'shadow-lg scale-105' : ''
+                                  }`}
+                                >
+                                  <div className="flex items-center">
+                                    {/* Drag Handle */}
+                                    <div
+                                      {...provided.dragHandleProps}
+                                      className="mr-2 cursor-grab active:cursor-grabbing"
+                                    >
+                                      <GripVertical className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                                    </div>
+                                    
+                                    <FileImage className="h-4 w-4 text-gray-400 mr-2" />
+                                    <span className="text-sm text-gray-700">{file.name}</span>
+                                    <span className="text-xs text-gray-500 ml-2">
+                                      ({(file.size / 1024 / 1024).toFixed(1)} MB)
+                                    </span>
+                                    {index === 0 && (
+                                      <Badge variant="secondary" className="ml-2 text-xs">
+                                        Main Image
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <button
+                                    onClick={() => removeFile(index)}
+                                    className="text-red-600 hover:text-red-800"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
                 </div>
               )}
             </div>

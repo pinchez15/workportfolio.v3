@@ -29,6 +29,7 @@ export interface Project {
   tags?: string[];
   skills?: string[];
   visible: boolean;
+  featured?: boolean;
   order_index?: number;
   created_at: string;
 }

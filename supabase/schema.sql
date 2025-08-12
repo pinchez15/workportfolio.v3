@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS projects (
   tags TEXT[],
   skills TEXT[],
   visible BOOLEAN DEFAULT true,
+  featured BOOLEAN DEFAULT false,
   order_index INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
