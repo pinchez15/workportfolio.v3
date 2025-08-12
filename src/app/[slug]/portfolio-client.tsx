@@ -550,8 +550,8 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
       const projectData = {
         ...projectForm,
-        image_paths: imagePaths.length > 0 ? imagePaths : null,
-        image_path: imagePaths.length > 0 ? imagePaths[0] : null
+        image_paths: imagePaths.length > 0 ? imagePaths : (editingProject?.image_paths || null),
+        image_path: imagePaths.length > 0 ? imagePaths[0] : (editingProject?.image_path || null)
       }
 
       if (editingProject) {

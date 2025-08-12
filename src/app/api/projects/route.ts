@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         url,
         skills,
         visible: visible !== false, // default to true
-        // featured: featured || false, // TODO: Uncomment after migration
+        featured: featured || false,
         image_path: image_path || null,
         image_paths: image_paths || null,
         order_index: order_index || 0 // Default to 0 if not provided
@@ -142,7 +142,7 @@ export async function PUT(request: NextRequest) {
         url,
         skills,
         visible: visible !== false,
-        // featured: featured || false, // TODO: Uncomment after migration
+        featured: featured || false,
         image_path: image_path || null,
         image_paths: image_paths || null,
         order_index: order_index || 0 // Default to 0 if not provided
