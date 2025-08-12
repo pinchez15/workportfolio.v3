@@ -918,7 +918,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                       <img
                         src={image}
                         alt={`${featuredProject.title} preview ${index + 1}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                       />
                     </div>
                   ))}
@@ -1008,7 +1008,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                                   <img
                                     src={getProjectImages(project)[0]}
                                     alt={project.title}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-contain"
                                   />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center text-gray-400">
