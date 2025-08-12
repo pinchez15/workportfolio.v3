@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
       visible,
       featured,
       image_path,
-      image_paths
+      image_paths,
+      order_index
     } = body;
 
     // Create Supabase client
@@ -59,7 +60,8 @@ export async function POST(request: NextRequest) {
         visible: visible !== false, // default to true
         // featured: featured || false, // TODO: Uncomment after migration
         image_path: image_path || null,
-        image_paths: image_paths || null
+        image_paths: image_paths || null,
+        order_index: order_index || 0 // Default to 0 if not provided
       })
       .select()
       .single();
@@ -102,7 +104,8 @@ export async function PUT(request: NextRequest) {
       visible,
       featured,
       image_path,
-      image_paths
+      image_paths,
+      order_index
     } = body;
 
     if (!id) {
@@ -141,7 +144,8 @@ export async function PUT(request: NextRequest) {
         visible: visible !== false,
         // featured: featured || false, // TODO: Uncomment after migration
         image_path: image_path || null,
-        image_paths: image_paths || null
+        image_paths: image_paths || null,
+        order_index: order_index || 0 // Default to 0 if not provided
       })
       .eq('id', id)
       .eq('user_id', userId) // Ensure user owns this project

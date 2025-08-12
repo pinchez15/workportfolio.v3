@@ -29,6 +29,7 @@ export interface Project {
   tags?: string[];
   skills?: string[];
   visible: boolean;
+  order_index?: number;
   created_at: string;
 }
 
@@ -41,6 +42,7 @@ export interface Link {
   icon?: string;
   show_preview?: boolean;
   visible: boolean;
+  order_index?: number;
   created_at: string;
 }
 

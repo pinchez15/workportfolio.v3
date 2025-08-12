@@ -51,7 +51,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
     .select("*")
     .eq("user_id", user.id)
     .eq("visible", true)
-    .order("created_at", { ascending: false })
+    .order("order_index", { ascending: true })
 
   if (projectsError) {
     console.error("Error fetching projects:", projectsError)
@@ -63,7 +63,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
     .select("*")
     .eq("user_id", user.id)
     .eq("visible", true)
-    .order("created_at", { ascending: false })
+    .order("order_index", { ascending: true })
 
   if (linksError) {
     console.error("Error fetching links:", linksError)

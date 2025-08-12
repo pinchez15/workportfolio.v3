@@ -16,7 +16,8 @@ export async function POST(request: NextRequest) {
       url, 
       description, 
       icon, 
-      visible 
+      visible,
+      order_index
     } = body;
 
     // Create Supabase client
@@ -40,7 +41,8 @@ export async function POST(request: NextRequest) {
         description,
         icon: icon || 'ExternalLink',
         visible: visible !== false, // default to true
-        show_preview: false
+        show_preview: false,
+        order_index: order_index || 0 // Set default order_index
       })
       .select()
       .single();
@@ -76,7 +78,8 @@ export async function PUT(request: NextRequest) {
       url, 
       description, 
       icon, 
-      visible 
+      visible,
+      order_index
     } = body;
 
     if (!id) {
@@ -102,7 +105,8 @@ export async function PUT(request: NextRequest) {
         url,
         description,
         icon: icon || 'ExternalLink',
-        visible: visible !== false
+        visible: visible !== false,
+        order_index: order_index || 0 // Set default order_index
       })
       .eq('id', id)
       .eq('user_id', userId) // Ensure user owns this link
