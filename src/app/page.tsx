@@ -188,7 +188,7 @@ export default async function HomePage() {
                     {/* Real Portfolio Screenshot */}
                     <div className="relative">
                       <img
-                        src="/Images/NatePortfolio.png"
+                        src="/NatePortfolio.png"
                         alt="Nate's WorkPortfolio - Live Example"
                         className="w-full h-auto rounded-2xl"
                       />
