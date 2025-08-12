@@ -167,7 +167,7 @@ export default async function HomePage() {
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </SignUpButton>
-                <Link href="https://www.workportfolio.io/natepinches" target="_blank" rel="noopener noreferrer">
+                <Link href="https://www.workportfolio.io/nate_pinches" target="_blank" rel="noopener noreferrer">
                   <Button
                     variant="outline"
                     size="lg"
@@ -185,69 +185,32 @@ export default async function HomePage() {
               <div className="relative z-10">
                 <Card className="bg-white shadow-2xl rounded-2xl border-0 overflow-hidden">
                   <CardContent className="p-0">
-                    {/* Portfolio Header */}
-                    <div className="p-6 border-b border-gray-100">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                            S
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-900 text-lg">Sarah Miller</h3>
-                            <p className="text-gray-600 mt-1">Product Designer</p>
-                          </div>
-                        </div>
-                        <Badge className="bg-green-100 text-green-800 border-green-200 font-medium">LIVE</Badge>
+                    {/* Real Portfolio Screenshot */}
+                    <div className="relative">
+                      <img
+                        src="/images/NatePortfolio"
+                        alt="Nate's WorkPortfolio - Live Example"
+                        className="w-full h-auto rounded-2xl"
+                      />
+                      {/* Overlay with portfolio info */}
+                      <div className="absolute top-4 right-4">
+                        <Badge className="bg-green-100 text-green-800 border-green-200 font-medium">
+                          LIVE
+                        </Badge>
                       </div>
-                      <p className="text-gray-500 text-sm font-mono">workportfolio.io/sarah</p>
                     </div>
-
-                    {/* Portfolio Content */}
-                    <div className="p-6">
-                      <div className="space-y-4">
-                        {/* Project 1 */}
-                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                                <span className="text-white text-xs font-semibold">E</span>
-                              </div>
-                              <div>
-                                <p className="font-semibold text-gray-900 text-sm">E-commerce Redesign</p>
-                                <p className="text-xs text-gray-600">Increased conversion by 34%</p>
-                              </div>
-                            </div>
-                            <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200 text-xs">
-                              LIVE
-                            </Badge>
-                          </div>
+                    
+                    {/* Portfolio Footer Info */}
+                    <div className="p-6 border-t border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-600">Real portfolio example</p>
+                          <p className="text-xs text-gray-500 font-mono">workportfolio.io/natepinches</p>
                         </div>
-
-                        {/* Project 2 */}
-                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                                <span className="text-white text-xs font-semibold">M</span>
-                              </div>
-                              <div>
-                                <p className="font-semibold text-gray-900 text-sm">Mobile App MVP</p>
-                                <p className="text-xs text-gray-600">Built in 4 minutes</p>
-                              </div>
-                            </div>
-                            <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-200 text-xs">
-                              VIEW
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Portfolio Footer */}
-                      <div className="mt-6 pt-4 border-t border-gray-100">
-                        <p className="text-xs text-gray-500 flex items-center">
+                        <div className="text-xs text-gray-500 flex items-center">
                           <Zap className="w-3 h-3 mr-2" />
-                          Portfolio created in under 5 minutes
-                        </p>
+                          Built in minutes
+                        </div>
                       </div>
                     </div>
                   </CardContent>
