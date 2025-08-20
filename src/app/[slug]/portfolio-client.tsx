@@ -829,15 +829,15 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
               <img
                 src={isEditMode ? editableUser.avatar_url : user.avatar_url}
                 alt={`${isEditMode ? editableUser.name : user.name} avatar`}
-                className="w-16 h-16 rounded-full object-cover flex-shrink-0"
-              />
+                      className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+                    />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+                    <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
                 {((isEditMode ? editableUser.name : user.name) || user.username)
                   .split(" ")
                   .map((n) => n[0])
                   .join("")}
-              </div>
+                    </div>
             )}
 
             {/* Content */}
@@ -888,61 +888,103 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
           </div>
         </div>
 
-        {/* Featured Project - What I'm working on */}
+        {/* Featured Project - Pinned to top but same size as others */}
         {(featuredProject || isEditMode) && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">What I'm working on</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Featured Project</h2>
+              <span className="text-sm text-gray-500 bg-blue-50 px-2 py-1 rounded-full">Pinned to top</span>
               {isEditMode && (
-                <Button
-                  onClick={openAddProject}
-                  size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add Project
-                </Button>
+                  <Button
+                    onClick={openAddProject}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Project
+                  </Button>
               )}
             </div>
             
             {featuredProject ? (
-              <Card
-                className="bg-white shadow-sm border-0 rounded-2xl overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200"
-                onClick={() => isEditMode ? openEditProject(featuredProject) : openProjectModal(featuredProject)}
-              >
-              <div className="p-4">
-                {/* Image Grid - Mobile optimized */}
-                <div className="grid grid-cols-2 gap-2 mb-4 aspect-[4/3] rounded-xl overflow-hidden bg-gray-100">
-                  {getProjectImages(featuredProject).slice(0, 4).map((image, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={image}
-                        alt={`${featuredProject.title} preview ${index + 1}`}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{featuredProject.title}</h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    {featuredProject.company}, {formatDate(featuredProject.created_at)}
-                  </p>
-                  <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{featuredProject.short_description}</p>
-                </div>
-              </div>
-            </Card>
-            ) : isEditMode ? (
-              <Card className="bg-white shadow-sm border-0 rounded-2xl overflow-hidden border-dashed border-gray-300">
-                <div className="p-8 text-center">
-                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Plus className="w-6 h-6 text-gray-400" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                <Card
+                  className="bg-white shadow-sm border-0 rounded-xl overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200 border-2 border-blue-200 relative"
+                  onClick={() => isEditMode ? openEditProject(featuredProject) : openProjectModal(featuredProject)}
+                >
+                  {/* Featured badge */}
+                  <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
+                    Featured
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Add your first project</h3>
-                  <p className="text-gray-600 mb-4">Showcase your best work to visitors</p>
+                  <CardContent className="p-4">
+                    {/* Project Image */}
+                    <div className="relative w-full h-32 mb-3 rounded-lg overflow-hidden bg-gray-100">
+                      {getProjectImages(featuredProject).length > 0 ? (
+                        <img
+                          src={getProjectImages(featuredProject)[0]}
+                          alt={featuredProject.title}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <FileImage className="h-8 w-8" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{featuredProject.title}</h3>
+                      
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm text-gray-600">
+                          {featuredProject.company} • {formatDate(featuredProject.created_at)}
+                        </p>
+                        {isEditMode ? (
+                          <div className="flex items-center space-x-1 flex-shrink-0">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openEditProject(featuredProject)
+                              }}
+                              className="p-1 h-7 w-7"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                deleteProject(featuredProject.id)
+                              }}
+                              className="p-1 h-7 w-7 text-red-600 hover:text-red-700"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <ArrowRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        )}
+                      </div>
+                      
+                      <p className="text-sm text-gray-700 leading-relaxed line-clamp-3 whitespace-pre-wrap">{featuredProject.short_description}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : isEditMode ? (
+              <Card className="bg-white shadow-sm border-0 rounded-xl overflow-hidden border-dashed border-gray-300">
+                <div className="p-6 text-center">
+                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Plus className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <h3 className="text-sm font-medium text-gray-900 mb-1">Add your first project</h3>
+                  <p className="text-xs text-gray-600 mb-3">Showcase your best work to visitors</p>
                   <Button
                     onClick={openAddProject}
+                    size="sm"
                     className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <Plus className="w-4 h-4 mr-1" />
@@ -958,7 +1000,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
         {(recentProjects.length > 0 || isEditMode) && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Recent projects</h2>
+              <h2 className="text-xl font-semibold text-gray-900">All Projects</h2>
               {isEditMode && (
                 <Button
                   onClick={openAddProject}
@@ -983,14 +1025,14 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                     {filteredRecentProjects.map((project, index) => (
                       <Draggable key={project.id} draggableId={project.id} index={index}>
                         {(provided, snapshot) => (
-                          <Card
+                <Card
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             className={`bg-white shadow-sm border-0 rounded-xl overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200 ${
                               snapshot.isDragging ? 'shadow-lg scale-105' : ''
                             }`}
-                            onClick={() => openProjectModal(project)}
-                          >
+                  onClick={() => openProjectModal(project)}
+                >
                             <CardContent className="p-4">
                               {/* Drag Handle - Only show in edit mode */}
                               {isEditMode && (
@@ -1005,17 +1047,17 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                               {/* Project Image */}
                               <div className="relative w-full h-32 mb-3 rounded-lg overflow-hidden bg-gray-100">
                                 {getProjectImages(project).length > 0 ? (
-                                  <img
-                                    src={getProjectImages(project)[0]}
+                      <img
+                        src={getProjectImages(project)[0]}
                                     alt={project.title}
                                     className="w-full h-full object-contain"
-                                  />
+                      />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center text-gray-400">
                                     <FileImage className="h-8 w-8" />
                                   </div>
                                 )}
-                              </div>
+                    </div>
 
                               <div>
                                 <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{project.title}</h3>
@@ -1024,49 +1066,49 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                                   <p className="text-sm text-gray-600">
                                     {project.company} • {formatDate(project.created_at)}
                                   </p>
-                                  {isEditMode ? (
-                                    <div className="flex items-center space-x-1 flex-shrink-0">
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={(e) => {
-                                          e.stopPropagation()
-                                          openEditProject(project)
-                                        }}
-                                        className="p-1 h-7 w-7"
-                                      >
-                                        <Edit className="h-3 w-3" />
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={(e) => {
-                                          e.stopPropagation()
-                                          deleteProject(project.id)
-                                        }}
-                                        className="p-1 h-7 w-7 text-red-600 hover:text-red-700"
-                                      >
-                                        <X className="h-3 w-3" />
-                                      </Button>
-                                    </div>
-                                  ) : (
-                                    <ArrowRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                                  )}
-                                </div>
-                                
-                                <p className="text-sm text-gray-700 leading-relaxed line-clamp-3 whitespace-pre-wrap">{project.short_description}</p>
-                              </div>
-                            </CardContent>
-                          </Card>
+                        {isEditMode ? (
+                          <div className="flex items-center space-x-1 flex-shrink-0">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openEditProject(project)
+                              }}
+                              className="p-1 h-7 w-7"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                deleteProject(project.id)
+                              }}
+                              className="p-1 h-7 w-7 text-red-600 hover:text-red-700"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <ArrowRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        )}
+                      </div>
+                      
+                      <p className="text-sm text-gray-700 leading-relaxed line-clamp-3 whitespace-pre-wrap">{project.short_description}</p>
+                    </div>
+                  </CardContent>
+                </Card>
                         )}
                       </Draggable>
-                    ))}
+              ))}
                     {provided.placeholder}
-                  </div>
+            </div>
                 )}
               </Droppable>
             </DragDropContext>
-            
+
             {filteredRecentProjects.length === 0 && selectedSkills.length > 0 && (
               <div className="text-center py-8">
                 <p className="text-gray-600 text-sm mb-3">No projects found with the selected skills.</p>
@@ -1118,15 +1160,15 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">Links</h2>
               {isEditMode && (
-                <Button
-                  onClick={openAddLink}
-                  size="sm"
-                  variant="outline"
-                  className="bg-transparent"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add Link
-                </Button>
+                  <Button
+                    onClick={openAddLink}
+                    size="sm"
+                    variant="outline"
+                    className="bg-transparent"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Link
+                  </Button>
               )}
             </div>
             
@@ -1148,8 +1190,8 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                           >
                             {isEditMode ? (
                               <Card className="bg-white shadow-sm border-0 rounded-xl overflow-hidden hover:shadow-md transition-all duration-200">
-                                <CardContent className="py-2 px-4">
-                                  <div className="flex items-center space-x-4">
+                    <CardContent className="py-2 px-4">
+                      <div className="flex items-center space-x-4">
                                     {/* Drag Handle - Only show in edit mode */}
                                     <div
                                       {...provided.dragHandleProps}
@@ -1158,81 +1200,81 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                                       <GripVertical className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing" />
                                     </div>
                                     
-                                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0">
-                                      {getIcon(link.icon || "ExternalLink")}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <h3 className="font-semibold text-gray-900 text-sm mb-1">{link.title}</h3>
-                                      {link.description && <p className="text-xs text-gray-600">{link.description}</p>}
-                                    </div>
-                                    <div className="flex items-center space-x-1">
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => openEditLink(link)}
-                                        className="p-1 h-8 w-8"
-                                      >
-                                        <Edit className="h-4 w-4" />
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => deleteLink(link.id)}
-                                        className="p-1 h-8 w-8 text-red-600 hover:text-red-700"
-                                      >
-                                        <X className="h-4 w-4" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            ) : (
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0">
+                          {getIcon(link.icon || "ExternalLink")}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 text-sm mb-1">{link.title}</h3>
+                          {link.description && <p className="text-xs text-gray-600">{link.description}</p>}
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => openEditLink(link)}
+                            className="p-1 h-8 w-8"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => deleteLink(link.id)}
+                            className="p-1 h-8 w-8 text-red-600 hover:text-red-700"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
                               <Link href={formatUrl(link.url)} target="_blank" rel="noopener noreferrer">
-                                <Card className="bg-white shadow-sm border-0 rounded-xl overflow-hidden hover:shadow-md transition-all duration-200">
-                                  <CardContent className="py-2 px-4">
-                                    <div className="flex items-center space-x-4">
-                                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0">
-                                        {getIcon(link.icon || "ExternalLink")}
-                                      </div>
-                                      <div className="flex-1 min-w-0">
-                                        <h3 className="font-semibold text-gray-900 text-sm mb-1">{link.title}</h3>
-                                        {link.description && <p className="text-xs text-gray-600">{link.description}</p>}
-                                      </div>
-                                      <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              </Link>
+                    <Card className="bg-white shadow-sm border-0 rounded-xl overflow-hidden hover:shadow-md transition-all duration-200">
+                      <CardContent className="py-2 px-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0">
+                            {getIcon(link.icon || "ExternalLink")}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-gray-900 text-sm mb-1">{link.title}</h3>
+                            {link.description && <p className="text-xs text-gray-600">{link.description}</p>}
+                          </div>
+                          <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
                             )}
                           </div>
                         )}
                       </Draggable>
-                    ))}
+              ))}
                     {provided.placeholder}
                   </div>
                 )}
               </Droppable>
             </DragDropContext>
-            
-            {isEditMode && editableLinks.length === 0 && (
-              <Card className="bg-white shadow-sm border-0 rounded-xl overflow-hidden border-dashed border-gray-300">
-                <div className="p-6 text-center">
-                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Plus className="w-5 h-5 text-gray-400" />
+              
+              {isEditMode && editableLinks.length === 0 && (
+                <Card className="bg-white shadow-sm border-0 rounded-xl overflow-hidden border-dashed border-gray-300">
+                  <div className="p-6 text-center">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Plus className="w-5 h-5 text-gray-400" />
+                    </div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-1">Add your first link</h3>
+                    <p className="text-xs text-gray-600 mb-3">Share your social profiles or website</p>
+                    <Button
+                      onClick={openAddLink}
+                      size="sm"
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add Link
+                    </Button>
                   </div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-1">Add your first link</h3>
-                  <p className="text-xs text-gray-600 mb-3">Share your social profiles or website</p>
-                  <Button
-                    onClick={openAddLink}
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Link
-                  </Button>
-                </div>
-              </Card>
-            )}
+                </Card>
+              )}
           </div>
         )}
       </main>
@@ -1689,7 +1731,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                           ref={provided.innerRef}
                           className="space-y-2"
                         >
-                          {uploadedFiles.map((file, index) => (
+                  {uploadedFiles.map((file, index) => (
                             <Draggable key={`${file.name}-${index}`} draggableId={`${file.name}-${index}`} index={index}>
                               {(provided, snapshot) => (
                                 <div
@@ -1699,7 +1741,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                                     snapshot.isDragging ? 'shadow-lg scale-105' : ''
                                   }`}
                                 >
-                                  <div className="flex items-center">
+                      <div className="flex items-center">
                                     {/* Drag Handle */}
                                     <div
                                       {...provided.dragHandleProps}
@@ -1708,27 +1750,27 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                                       <GripVertical className="h-4 w-4 text-gray-400 hover:text-gray-600" />
                                     </div>
                                     
-                                    <FileImage className="h-4 w-4 text-gray-400 mr-2" />
-                                    <span className="text-sm text-gray-700">{file.name}</span>
-                                    <span className="text-xs text-gray-500 ml-2">
-                                      ({(file.size / 1024 / 1024).toFixed(1)} MB)
-                                    </span>
+                        <FileImage className="h-4 w-4 text-gray-400 mr-2" />
+                        <span className="text-sm text-gray-700">{file.name}</span>
+                        <span className="text-xs text-gray-500 ml-2">
+                          ({(file.size / 1024 / 1024).toFixed(1)} MB)
+                        </span>
                                     {index === 0 && (
                                       <Badge variant="secondary" className="ml-2 text-xs">
                                         Main Image
                                       </Badge>
                                     )}
-                                  </div>
-                                  <button
-                                    onClick={() => removeFile(index)}
-                                    className="text-red-600 hover:text-red-800"
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </button>
-                                </div>
+                      </div>
+                      <button
+                        onClick={() => removeFile(index)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
                               )}
                             </Draggable>
-                          ))}
+                  ))}
                           {provided.placeholder}
                         </div>
                       )}
@@ -1760,7 +1802,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                   className="rounded border-gray-300"
                 />
                 <label htmlFor="featured" className="text-sm text-gray-700">
-                  Feature this project (show in "What I'm working on" section)
+                  Feature this project (pin to top of portfolio)
                 </label>
               </div>
             </div>

@@ -33,7 +33,8 @@ export function ProjectsEditor({ projects, onUpdate }: ProjectsEditorProps) {
     image_paths: [],
     tags: [],
     skills: [],
-    visible: true
+    visible: true,
+    featured: false
   })
   const [uploadedImages, setUploadedImages] = useState<string[]>([])
 
@@ -102,7 +103,8 @@ export function ProjectsEditor({ projects, onUpdate }: ProjectsEditorProps) {
         ...formData,
         user_id: clerkUser.id,
         image_path: uploadedImages[0] || null, // Keep first image as main image
-        image_paths: uploadedImages
+        image_paths: uploadedImages,
+        featured: formData.featured || false
       }
 
       if (editingProject?.id) {
@@ -145,7 +147,8 @@ export function ProjectsEditor({ projects, onUpdate }: ProjectsEditorProps) {
         image_paths: [],
         tags: [],
         skills: [],
-        visible: true
+        visible: true,
+        featured: false
       })
       setUploadedImages([])
     } catch {
@@ -196,7 +199,8 @@ export function ProjectsEditor({ projects, onUpdate }: ProjectsEditorProps) {
         image_paths: [],
         tags: [],
         skills: [],
-        visible: true
+        visible: true,
+        featured: false
       })
       setUploadedImages([])
     }
@@ -338,6 +342,20 @@ export function ProjectsEditor({ projects, onUpdate }: ProjectsEditorProps) {
                 )}
               </div>
 
+              {/* Featured Project Checkbox */}
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="featured"
+                  checked={formData.featured || false}
+                  onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.checked }))}
+                  className="rounded border-gray-300"
+                />
+                <label htmlFor="featured" className="text-sm text-gray-700">
+                  Feature this project (pin to top of portfolio)
+                </label>
+              </div>
+
               <div className="flex justify-end space-x-2 pt-4">
                 <Button
                   variant="outline"
@@ -363,7 +381,14 @@ export function ProjectsEditor({ projects, onUpdate }: ProjectsEditorProps) {
           <div key={project.id} className="border rounded-lg p-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h4 className="font-medium">{project.title}</h4>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-medium">{project.title}</h4>
+                  {project.featured && (
+                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                      Featured
+                    </span>
+                  )}
+                </div>
                 {project.company && (
                   <p className="text-sm text-gray-600 flex items-center mt-1">
                     <Building className="h-3 w-3 mr-1" />
