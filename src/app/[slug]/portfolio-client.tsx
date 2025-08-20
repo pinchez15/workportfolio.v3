@@ -888,119 +888,15 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
           </div>
         </div>
 
-        {/* Featured Project - Pinned to top but same size as others */}
-        {(featuredProject || isEditMode) && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Featured Project</h2>
-              <span className="text-sm text-gray-500 bg-blue-50 px-2 py-1 rounded-full">Pinned to top</span>
-              {isEditMode && (
-                  <Button
-                    onClick={openAddProject}
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Project
-                  </Button>
-              )}
-            </div>
+
             
-            {featuredProject ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                <Card
-                  className="bg-white shadow-sm border-0 rounded-xl overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200 border-2 border-blue-200 relative"
-                  onClick={() => isEditMode ? openEditProject(featuredProject) : openProjectModal(featuredProject)}
-                >
-                  {/* Featured badge */}
-                  <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-                    Featured
-                  </div>
-                  <CardContent className="p-4">
-                    {/* Project Image */}
-                    <div className="relative w-full h-32 mb-3 rounded-lg overflow-hidden bg-gray-100">
-                      {getProjectImages(featuredProject).length > 0 ? (
-                        <img
-                          src={getProjectImages(featuredProject)[0]}
-                          alt={featuredProject.title}
-                          className="w-full h-full object-contain"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          <FileImage className="h-8 w-8" />
-                        </div>
-                      )}
-                    </div>
 
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{featuredProject.title}</h3>
-                      
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm text-gray-600">
-                          {featuredProject.company} • {formatDate(featuredProject.created_at)}
-                        </p>
-                        {isEditMode ? (
-                          <div className="flex items-center space-x-1 flex-shrink-0">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                openEditProject(featuredProject)
-                              }}
-                              className="p-1 h-7 w-7"
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                deleteProject(featuredProject.id)
-                              }}
-                              className="p-1 h-7 w-7 text-red-600 hover:text-red-700"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <ArrowRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        )}
-                      </div>
-                      
-                      <p className="text-sm text-gray-700 leading-relaxed line-clamp-3 whitespace-pre-wrap">{featuredProject.short_description}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            ) : isEditMode ? (
-              <Card className="bg-white shadow-sm border-0 rounded-xl overflow-hidden border-dashed border-gray-300">
-                <div className="p-6 text-center">
-                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Plus className="w-5 h-5 text-gray-400" />
-                  </div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-1">Add your first project</h3>
-                  <p className="text-xs text-gray-600 mb-3">Showcase your best work to visitors</p>
-                  <Button
-                    onClick={openAddProject}
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Project
-                  </Button>
-                </div>
-              </Card>
-            ) : null}
-          </div>
-        )}
 
-        {/* Recent Projects - List format */}
-        {(recentProjects.length > 0 || isEditMode) && (
+        {/* My Projects - Combined featured and regular projects */}
+        {((featuredProject && recentProjects.length > 0) || recentProjects.length > 0 || isEditMode) && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">All Projects</h2>
+              <h2 className="text-xl font-semibold text-gray-900">My Projects</h2>
               {isEditMode && (
                 <Button
                   onClick={openAddProject}
@@ -1022,17 +918,87 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                     ref={provided.innerRef}
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
                   >
+                    {/* Featured Project - Always first */}
+                    {featuredProject && (
+                      <Card
+                        className="bg-white shadow-sm border-0 rounded-xl overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200 border-2 border-blue-200 relative"
+                        onClick={() => isEditMode ? openEditProject(featuredProject) : openProjectModal(featuredProject)}
+                      >
+                        {/* Featured badge */}
+                        <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
+                          Featured
+                        </div>
+                        <CardContent className="p-4">
+                          {/* Project Image */}
+                          <div className="relative w-full h-32 mb-3 rounded-lg overflow-hidden bg-gray-100">
+                            {getProjectImages(featuredProject).length > 0 ? (
+                              <img
+                                src={getProjectImages(featuredProject)[0]}
+                                alt={featuredProject.title}
+                                className="w-full h-full object-contain"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                <FileImage className="h-8 w-8" />
+                              </div>
+                            )}
+                          </div>
+
+                          <div>
+                            <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{featuredProject.title}</h3>
+                            
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="text-sm text-gray-600">
+                                {featuredProject.company} • {formatDate(featuredProject.created_at)}
+                              </p>
+                              {isEditMode ? (
+                                <div className="flex items-center space-x-1 flex-shrink-0">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      openEditProject(featuredProject)
+                                    }}
+                                    className="p-1 h-7 w-7"
+                                  >
+                                    <Edit className="h-3 w-3" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      deleteProject(featuredProject.id)
+                                    }}
+                                    className="p-1 h-7 w-7 text-red-600 hover:text-red-700"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <ArrowRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                              )}
+                            </div>
+                            
+                            <p className="text-sm text-gray-700 leading-relaxed line-clamp-3 whitespace-pre-wrap">{featuredProject.short_description}</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Regular Projects */}
                     {filteredRecentProjects.map((project, index) => (
                       <Draggable key={project.id} draggableId={project.id} index={index}>
                         {(provided, snapshot) => (
-                <Card
+                          <Card
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             className={`bg-white shadow-sm border-0 rounded-xl overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200 ${
                               snapshot.isDragging ? 'shadow-lg scale-105' : ''
                             }`}
-                  onClick={() => openProjectModal(project)}
-                >
+                            onClick={() => openProjectModal(project)}
+                          >
                             <CardContent className="p-4">
                               {/* Drag Handle - Only show in edit mode */}
                               {isEditMode && (
@@ -1047,17 +1013,17 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                               {/* Project Image */}
                               <div className="relative w-full h-32 mb-3 rounded-lg overflow-hidden bg-gray-100">
                                 {getProjectImages(project).length > 0 ? (
-                      <img
-                        src={getProjectImages(project)[0]}
+                                  <img
+                                    src={getProjectImages(project)[0]}
                                     alt={project.title}
                                     className="w-full h-full object-contain"
-                      />
+                                  />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center text-gray-400">
                                     <FileImage className="h-8 w-8" />
                                   </div>
                                 )}
-                    </div>
+                              </div>
 
                               <div>
                                 <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{project.title}</h3>
@@ -1066,45 +1032,45 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                                   <p className="text-sm text-gray-600">
                                     {project.company} • {formatDate(project.created_at)}
                                   </p>
-                        {isEditMode ? (
-                          <div className="flex items-center space-x-1 flex-shrink-0">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                openEditProject(project)
-                              }}
-                              className="p-1 h-7 w-7"
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                deleteProject(project.id)
-                              }}
-                              className="p-1 h-7 w-7 text-red-600 hover:text-red-700"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <ArrowRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        )}
-                      </div>
-                      
-                      <p className="text-sm text-gray-700 leading-relaxed line-clamp-3 whitespace-pre-wrap">{project.short_description}</p>
-                    </div>
-                  </CardContent>
-                </Card>
+                                  {isEditMode ? (
+                                    <div className="flex items-center space-x-1 flex-shrink-0">
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          openEditProject(project)
+                                        }}
+                                        className="p-1 h-7 w-7"
+                                      >
+                                        <Edit className="h-3 w-3" />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          deleteProject(project.id)
+                                        }}
+                                        className="p-1 h-7 w-7 text-red-600 hover:text-red-700"
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <ArrowRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                  )}
+                                </div>
+                                
+                                <p className="text-sm text-gray-700 leading-relaxed line-clamp-3 whitespace-pre-wrap">{project.short_description}</p>
+                              </div>
+                            </CardContent>
+                          </Card>
                         )}
                       </Draggable>
-              ))}
+                    ))}
                     {provided.placeholder}
-            </div>
+                  </div>
                 )}
               </Droppable>
             </DragDropContext>
@@ -1116,6 +1082,34 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                   Clear Filters
                 </Button>
               </div>
+            )}
+
+            {/* Empty state when no projects at all */}
+            {!featuredProject && filteredRecentProjects.length === 0 && !isEditMode && (
+              <div className="text-center py-8">
+                <p className="text-gray-600 text-sm mb-3">No projects added yet.</p>
+              </div>
+            )}
+
+            {/* Empty state for edit mode */}
+            {!featuredProject && filteredRecentProjects.length === 0 && isEditMode && (
+              <Card className="bg-white shadow-sm border-0 rounded-xl overflow-hidden border-dashed border-gray-300">
+                <div className="p-6 text-center">
+                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Plus className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <h3 className="text-sm font-medium text-gray-900 mb-1">Add your first project</h3>
+                  <p className="text-xs text-gray-600 mb-3">Showcase your best work to visitors</p>
+                  <Button
+                    onClick={openAddProject}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Project
+                  </Button>
+                </div>
+              </Card>
             )}
           </div>
         )}
@@ -1802,7 +1796,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                   className="rounded border-gray-300"
                 />
                 <label htmlFor="featured" className="text-sm text-gray-700">
-                  Feature this project (pin to top of portfolio)
+                  Feature this project (pin to top of projects section)
                 </label>
               </div>
             </div>

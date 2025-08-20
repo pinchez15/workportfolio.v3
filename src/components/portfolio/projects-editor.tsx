@@ -352,7 +352,7 @@ export function ProjectsEditor({ projects, onUpdate }: ProjectsEditorProps) {
                   className="rounded border-gray-300"
                 />
                 <label htmlFor="featured" className="text-sm text-gray-700">
-                  Feature this project (pin to top of portfolio)
+                  Feature this project (pin to top of projects section)
                 </label>
               </div>
 
