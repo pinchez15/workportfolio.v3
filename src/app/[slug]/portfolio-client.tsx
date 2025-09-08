@@ -13,6 +13,7 @@ import { useUser, UserButton } from "@clerk/nextjs"
 import type { User, Portfolio, Project, Link as DatabaseLink } from "@/types/database"
 import { getSkillSuggestions } from "@/lib/skills"
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
+import { CalendlyComponent } from "@/components/portfolio/calendly-component"
 
 interface PortfolioClientProps {
   user: User
@@ -891,6 +892,20 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
             
 
+
+        {/* Calendly Booking Section */}
+        {(portfolio.calendly_url || isEditMode) && (
+          <div className="mb-8">
+            <CalendlyComponent 
+              calendlyUrl={isEditMode ? editableUser.calendly_url : portfolio.calendly_url}
+              isEditMode={isEditMode}
+              onEdit={() => {
+                // This will be handled by the header editor
+                // For now, we'll just show the component
+              }}
+            />
+          </div>
+        )}
 
         {/* My Projects - Combined featured and regular projects */}
         {((featuredProject && recentProjects.length > 0) || recentProjects.length > 0 || isEditMode) && (

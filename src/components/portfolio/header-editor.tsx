@@ -24,7 +24,8 @@ export function HeaderEditor({ user, onUpdate }: HeaderEditorProps) {
     name: user.name || "",
     title: user.title || "",
     bio: user.bio || "",
-    avatar_url: user.avatar_url || ""
+    avatar_url: user.avatar_url || "",
+    calendly_url: user.calendly_url || ""
   })
 
   const supabase = createClient()
@@ -78,7 +79,8 @@ export function HeaderEditor({ user, onUpdate }: HeaderEditorProps) {
         .update({
           name: formData.name,
           title: formData.title,
-          bio: formData.bio
+          bio: formData.bio,
+          calendly_url: formData.calendly_url
         })
         .eq('id', clerkUser.id)
 
@@ -165,6 +167,19 @@ export function HeaderEditor({ user, onUpdate }: HeaderEditorProps) {
               placeholder="Tell visitors about yourself and your expertise..."
               rows={4}
             />
+          </div>
+
+          <div>
+            <Label htmlFor="calendly_url">Calendly Booking Link (Optional)</Label>
+            <Input
+              id="calendly_url"
+              value={formData.calendly_url}
+              onChange={(e) => setFormData(prev => ({ ...prev, calendly_url: e.target.value }))}
+              placeholder="https://calendly.com/yourusername/meeting-type"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Add your Calendly link to let visitors book meetings with you
+            </p>
           </div>
         </div>
 

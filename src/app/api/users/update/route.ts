@@ -11,7 +11,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { name, title, bio } = body;
+    const { name, title, bio, calendly_url } = body;
 
     // Create Supabase client
     const supabaseUrl = process.env.SUPABASE_URL;
@@ -31,6 +31,7 @@ export async function PUT(request: Request) {
         name,
         title,
         bio,
+        calendly_url,
       })
       .eq('id', userId)
       .select();
