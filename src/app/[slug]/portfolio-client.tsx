@@ -9,9 +9,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { useUser, UserButton } from "@clerk/nextjs"
 import type { User, Portfolio, Project, Link as DatabaseLink } from "@/types/database"
 import { getSkillSuggestions } from "@/lib/skills"
+import { renderFormattedText } from "@/lib/formatting"
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
 import { CalendlyComponent } from "@/components/portfolio/calendly-component"
 
@@ -40,51 +42,21 @@ const getIcon = (iconName: string) => {
   }
 }
 
-// Helper function to render formatted text
-const renderFormattedText = (text: string) => {
-  if (!text) return '';
-  
-  // Convert markdown-like syntax to HTML
-  let formattedText = text
-    // Bold: **text** -> <strong>text</strong>
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    // Italic: *text* -> <em>text</em>
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    // Underline: __text__ -> <u>text</u>
-    .replace(/__(.*?)__/g, '<u>$1</u>')
-    // Convert line breaks to <br> tags
-    .replace(/\n/g, '<br>');
-  
-  // Handle bullet points and numbered lists line by line
-  const lines = text.split('\n');
-  const formattedLines = lines.map(line => {
-    if (line.trim().startsWith('• ')) {
-      return `<li>${line.trim().substring(2)}</li>`;
-    }
-    if (/^\d+\.\s/.test(line.trim())) {
-      return `<li>${line.trim().replace(/^\d+\.\s/, '')}</li>`;
-    }
-    return line;
-  });
-  
-  // Join lines and wrap lists in <ul> tags
-  formattedText = formattedLines.join('<br>');
-  if (formattedText.includes('<li>')) {
-    formattedText = formattedText.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
-  }
-  
-  return formattedText;
-}
+// renderFormattedText imported from @/lib/formatting (with XSS protection via DOMPurify)
 
 export function PortfolioClient({ user, portfolio, projects, links, allSkills }: PortfolioClientProps) {
   const { user: clerkUser, isSignedIn } = useUser()
+  const searchParams = useSearchParams()
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
-  
+
   // Edit mode states
   const [isEditMode, setIsEditMode] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+
+  // Auto-open add project modal if coming from onboarding
+  const [hasHandledAddProject, setHasHandledAddProject] = useState(false)
   
   // Editable user data
   const [editableUser, setEditableUser] = useState<User>(user)
@@ -129,6 +101,17 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
   // Check if current user owns this portfolio
   const isOwner = isSignedIn && clerkUser?.id === user.id
+
+  // Auto-open add project modal when coming from onboarding
+  useEffect(() => {
+    if (isOwner && !hasHandledAddProject && searchParams.get('addProject') === 'true') {
+      setIsEditMode(true)
+      setIsAddingProject(true)
+      setHasHandledAddProject(true)
+      // Clean up the URL without triggering a navigation
+      window.history.replaceState({}, '', `/${user.username}`)
+    }
+  }, [isOwner, hasHandledAddProject, searchParams, user.username])
 
   // Drag and drop handlers
   const handleProjectDragEnd = async (result: DropResult) => {

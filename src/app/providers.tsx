@@ -1,6 +1,5 @@
 'use client';
 
-import { ClerkProvider } from '@clerk/nextjs';
 import { ReactNode } from 'react';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from 'sonner';
@@ -10,17 +9,16 @@ interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
+  // Note: ClerkProvider is already wrapped in layout.tsx - do not duplicate here
   return (
-    <ClerkProvider>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        {children}
-        <Toaster />
-      </ThemeProvider>
-    </ClerkProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      {children}
+      <Toaster />
+    </ThemeProvider>
   );
 } 

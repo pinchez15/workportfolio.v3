@@ -3,15 +3,41 @@ import type { NextConfig } from "next";
 const securityHeaders = [
   {
     key: "Content-Security-Policy",
-    value: "default-src * 'self' 'unsafe-inline' data: blob:;",
+    value: [
+      "default-src 'self'",
+      // Scripts: self + Clerk + Calendly + PostHog
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.com https://*.clerk.accounts.dev https://assets.calendly.com https://us-assets.i.posthog.com",
+      // Styles: self + inline (needed for Tailwind/emotion)
+      "style-src 'self' 'unsafe-inline' https://assets.calendly.com",
+      // Images: self + data URIs + common image sources
+      "img-src 'self' data: blob: https: http:",
+      // Fonts: self + Google Fonts
+      "font-src 'self' data: https://fonts.gstatic.com",
+      // Connect: API calls to self + Clerk + Supabase + PostHog + Calendly
+      "connect-src 'self' https://*.clerk.com https://*.clerk.accounts.dev https://*.supabase.co wss://*.supabase.co https://us.i.posthog.com https://us-assets.i.posthog.com https://calendly.com https://api.calendly.com",
+      // Frames: Calendly embeds
+      "frame-src 'self' https://calendly.com https://*.clerk.accounts.dev",
+      // Workers for service workers
+      "worker-src 'self' blob:",
+      // Media
+      "media-src 'self' blob: data:",
+    ].join("; "),
   },
   {
     key: "X-Frame-Options",
     value: "SAMEORIGIN",
   },
   {
+    key: "X-Content-Type-Options",
+    value: "nosniff",
+  },
+  {
     key: "Referrer-Policy",
-    value: "origin-when-cross-origin",
+    value: "strict-origin-when-cross-origin",
+  },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=()",
   },
 ];
 
