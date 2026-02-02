@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ExternalLink, Github, Linkedin, Mail, Youtube, ArrowRight, ChevronLeft, ChevronRight, Edit, Save, Plus, X, Upload, FileImage, GripVertical } from "lucide-react"
+import { ExternalLink, Github, Linkedin, Mail, Youtube, ArrowRight, ChevronLeft, ChevronRight, Edit, Save, Plus, X, Upload, FileImage, GripVertical, Briefcase, Loader2, Copy, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -58,7 +58,12 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
 
   // Auto-open add project modal if coming from onboarding
   const [hasHandledAddProject, setHasHandledAddProject] = useState(false)
-  
+
+  // Contact email reveal state (hidden from crawlers)
+  const [revealedEmail, setRevealedEmail] = useState<string | null>(null)
+  const [isLoadingEmail, setIsLoadingEmail] = useState(false)
+  const [emailCopied, setEmailCopied] = useState(false)
+
   // Editable user data
   const [editableUser, setEditableUser] = useState<User>(user)
   const [editableProjects, setEditableProjects] = useState<Project[]>(projects)
@@ -113,6 +118,42 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
       window.history.replaceState({}, '', `/${user.username}`)
     }
   }, [isOwner, hasHandledAddProject, searchParams, user.username])
+
+  // Fetch contact email (hidden from crawlers - only fetched on user action)
+  const handleRevealEmail = async () => {
+    if (revealedEmail || isLoadingEmail) return
+
+    setIsLoadingEmail(true)
+    try {
+      const response = await fetch('/api/users/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setRevealedEmail(data.email)
+      }
+    } catch (error) {
+      console.error('Failed to fetch contact email:', error)
+    } finally {
+      setIsLoadingEmail(false)
+    }
+  }
+
+  // Copy email to clipboard
+  const handleCopyEmail = async () => {
+    if (!revealedEmail) return
+
+    try {
+      await navigator.clipboard.writeText(revealedEmail)
+      setEmailCopied(true)
+      setTimeout(() => setEmailCopied(false), 2000)
+    } catch (error) {
+      console.error('Failed to copy email:', error)
+    }
+  }
 
   // Drag and drop handlers
   const handleProjectDragEnd = async (result: DropResult) => {
@@ -341,6 +382,8 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
           name: editableUser.name,
           title: editableUser.title,
           bio: editableUser.bio,
+          contact_email: editableUser.contact_email,
+          available_for_hire: editableUser.available_for_hire,
         }),
       })
 
@@ -858,15 +901,103 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                       className="resize-none"
                     />
                   </div>
+
+                  {/* Contact Settings */}
+                  <div className="pt-4 border-t">
+                    <h3 className="text-sm font-medium text-gray-700 mb-3">Contact Settings</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
+                        <Input
+                          type="email"
+                          value={editableUser.contact_email || ""}
+                          onChange={(e) => setEditableUser(prev => ({ ...prev, contact_email: e.target.value }))}
+                          placeholder="your@email.com"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Hidden from web crawlers - only shown when visitors click &quot;Contact&quot;</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="available-for-hire"
+                          checked={editableUser.available_for_hire || false}
+                          onChange={(e) => setEditableUser(prev => ({ ...prev, available_for_hire: e.target.checked }))}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <label htmlFor="available-for-hire" className="text-sm text-gray-700">
+                          Show &quot;Available for hire&quot; badge
+                        </label>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 // View mode - show content
                 <>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                    Hey, I'm {user.name || user.username}
-                  </h1>
-                  <p className="text-lg text-gray-600 mb-4">{user.title}</p>
-                  <p className="text-gray-600 leading-relaxed">{portfolio.bio || user.bio}</p>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                        Hey, I&apos;m {user.name || user.username}
+                      </h1>
+                      <p className="text-lg text-gray-600 mb-4">{user.title}</p>
+                    </div>
+                    {user.available_for_hire && (
+                      <Badge className="bg-green-100 text-green-800 border-green-200 flex-shrink-0">
+                        <Briefcase className="w-3 h-3 mr-1" />
+                        Available for hire
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-gray-600 leading-relaxed mb-4">{portfolio.bio || user.bio}</p>
+
+                  {/* Contact Button */}
+                  {user.contact_email && (
+                    <div className="pt-4">
+                      {!revealedEmail ? (
+                        <Button
+                          onClick={handleRevealEmail}
+                          variant="outline"
+                          size="sm"
+                          disabled={isLoadingEmail}
+                          className="bg-transparent"
+                        >
+                          {isLoadingEmail ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Loading...
+                            </>
+                          ) : (
+                            <>
+                              <Mail className="w-4 h-4 mr-2" />
+                              Contact Me
+                            </>
+                          )}
+                        </Button>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <a
+                            href={`mailto:${revealedEmail}`}
+                            className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                          >
+                            <Mail className="w-4 h-4 mr-2" />
+                            {revealedEmail}
+                          </a>
+                          <Button
+                            onClick={handleCopyEmail}
+                            variant="ghost"
+                            size="sm"
+                            className="text-gray-500 hover:text-gray-700"
+                          >
+                            {emailCopied ? (
+                              <Check className="w-4 h-4 text-green-500" />
+                            ) : (
+                              <Copy className="w-4 h-4" />
+                            )}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </>
               )}
             </div>

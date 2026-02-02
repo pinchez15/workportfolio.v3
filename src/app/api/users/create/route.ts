@@ -65,6 +65,7 @@ export async function POST() {
       username,
       name,
       avatar_url: user.imageUrl,
+      portfolio_url: `https://workportfolio.io/${username}`,
     };
     
     console.log('📝 Inserting user record via fallback API:', userRecord);

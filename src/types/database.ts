@@ -6,6 +6,9 @@ export interface User {
   avatar_url?: string;
   bio?: string;
   calendly_url?: string;
+  contact_email?: string;
+  available_for_hire?: boolean;
+  portfolio_url?: string;
   social_links?: {
     linkedin?: string;
     github?: string;

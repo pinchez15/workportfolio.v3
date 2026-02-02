@@ -11,12 +11,12 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { name, title, bio, calendly_url } = body;
+    const { name, title, bio, calendly_url, contact_email, available_for_hire } = body;
 
     // Create Supabase client
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
+
     if (!supabaseUrl || !supabaseKey) {
       console.error('Missing Supabase environment variables');
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
@@ -24,15 +24,19 @@ export async function PUT(request: Request) {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Build update object (only include defined fields)
+    const updateData: Record<string, unknown> = {};
+    if (name !== undefined) updateData.name = name;
+    if (title !== undefined) updateData.title = title;
+    if (bio !== undefined) updateData.bio = bio;
+    if (calendly_url !== undefined) updateData.calendly_url = calendly_url;
+    if (contact_email !== undefined) updateData.contact_email = contact_email;
+    if (available_for_hire !== undefined) updateData.available_for_hire = available_for_hire;
+
     // Update user in database
     const { data, error } = await supabase
       .from('users')
-      .update({
-        name,
-        title,
-        bio,
-        calendly_url,
-      })
+      .update(updateData)
       .eq('id', userId)
       .select();
 

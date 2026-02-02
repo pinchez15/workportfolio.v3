@@ -101,6 +101,7 @@ async function createUserInDatabase(userData: {
       username,
       name,
       avatar_url: userData.image_url,
+      portfolio_url: `https://workportfolio.io/${username}`,
     };
     
     console.log('📝 Inserting user record:', userRecord);
