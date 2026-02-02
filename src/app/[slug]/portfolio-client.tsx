@@ -879,7 +879,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                       value={editableUser.name || ""}
                       onChange={(e) => setEditableUser(prev => ({ ...prev, name: e.target.value }))}
                       placeholder="Your full name"
-                      className="text-2xl font-bold"
+                      className="text-2xl font-bold text-gray-900 bg-white"
                     />
                   </div>
                   <div>
@@ -888,7 +888,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                       value={editableUser.title || ""}
                       onChange={(e) => setEditableUser(prev => ({ ...prev, title: e.target.value }))}
                       placeholder="Your professional title"
-                      className="text-lg"
+                      className="text-lg text-gray-900 bg-white"
                     />
                   </div>
                   <div>
@@ -898,7 +898,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                       onChange={(e) => setEditableUser(prev => ({ ...prev, bio: e.target.value }))}
                       placeholder="Tell people about yourself..."
                       rows={3}
-                      className="resize-none"
+                      className="resize-none text-gray-900 bg-white"
                     />
                   </div>
 
@@ -913,6 +913,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                           value={editableUser.contact_email || ""}
                           onChange={(e) => setEditableUser(prev => ({ ...prev, contact_email: e.target.value }))}
                           placeholder="your@email.com"
+                          className="text-gray-900 bg-white"
                         />
                         <p className="text-xs text-gray-500 mt-1">Hidden from web crawlers - only shown when visitors click &quot;Contact&quot;</p>
                       </div>
