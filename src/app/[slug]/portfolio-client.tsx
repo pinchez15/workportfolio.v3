@@ -949,18 +949,16 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                       </Badge>
                     )}
                   </div>
-                  <p className="text-gray-600 leading-relaxed mb-4">{portfolio.bio || user.bio}</p>
+                  <p className="text-gray-600 leading-relaxed">{portfolio.bio || user.bio}</p>
 
-                  {/* Contact Button */}
+                  {/* Contact CTA - Prominent button */}
                   {user.contact_email && (
-                    <div className="pt-4">
+                    <div className="mt-6">
                       {!revealedEmail ? (
                         <Button
                           onClick={handleRevealEmail}
-                          variant="outline"
-                          size="sm"
                           disabled={isLoadingEmail}
-                          className="bg-transparent"
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-xl shadow-md hover:shadow-lg transition-all"
                         >
                           {isLoadingEmail ? (
                             <>
@@ -970,29 +968,35 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                           ) : (
                             <>
                               <Mail className="w-4 h-4 mr-2" />
-                              Contact Me
+                              Get In Touch
                             </>
                           )}
                         </Button>
                       ) : (
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                          <Mail className="w-5 h-5 text-blue-600 flex-shrink-0" />
                           <a
                             href={`mailto:${revealedEmail}`}
-                            className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                            className="text-blue-600 font-medium hover:underline"
                           >
-                            <Mail className="w-4 h-4 mr-2" />
                             {revealedEmail}
                           </a>
                           <Button
                             onClick={handleCopyEmail}
                             variant="ghost"
                             size="sm"
-                            className="text-gray-500 hover:text-gray-700"
+                            className="text-gray-500 hover:text-gray-700 ml-auto"
                           >
                             {emailCopied ? (
-                              <Check className="w-4 h-4 text-green-500" />
+                              <>
+                                <Check className="w-4 h-4 text-green-500 mr-1" />
+                                <span className="text-green-600 text-sm">Copied!</span>
+                              </>
                             ) : (
-                              <Copy className="w-4 h-4" />
+                              <>
+                                <Copy className="w-4 h-4 mr-1" />
+                                <span className="text-sm">Copy</span>
+                              </>
                             )}
                           </Button>
                         </div>
