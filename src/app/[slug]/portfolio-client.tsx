@@ -16,6 +16,7 @@ import { getSkillSuggestions } from "@/lib/skills"
 import { renderFormattedText } from "@/lib/formatting"
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
 import { CalendlyComponent } from "@/components/portfolio/calendly-component"
+import { ImageCarousel } from "@/components/portfolio/image-carousel"
 
 interface PortfolioClientProps {
   user: User
@@ -1830,49 +1831,16 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
               </DialogHeader>
 
               <div className="space-y-6">
-                {/* Image Carousel */}
+                {/* Image Carousel - optimized with preloading */}
                 {(() => {
                   const projectImages = getProjectImages(selectedProject)
                   return projectImages.length > 0 ? (
-                    <div className="relative">
-                      <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden">
-                        <img
-                          src={projectImages[currentImageIndex]}
-                          alt={`${selectedProject.title} - Image ${currentImageIndex + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-
-                      {projectImages.length > 1 && (
-                        <>
-                          <button
-                            onClick={prevImage}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
-                          >
-                            <ChevronLeft className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={nextImage}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
-                          >
-                            <ChevronRight className="h-5 w-5" />
-                          </button>
-
-                          {/* Image indicators */}
-                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-                            {projectImages.map((_, index) => (
-                              <button
-                                key={index}
-                                onClick={() => setCurrentImageIndex(index)}
-                                className={`w-2 h-2 rounded-full transition-colors ${
-                                  index === currentImageIndex ? "bg-white" : "bg-white/50"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </div>
+                    <ImageCarousel
+                      images={projectImages}
+                      alt={selectedProject.title}
+                      initialIndex={currentImageIndex}
+                      onIndexChange={setCurrentImageIndex}
+                    />
                   ) : null
                 })()}
 

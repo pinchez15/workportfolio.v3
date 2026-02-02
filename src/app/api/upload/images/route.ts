@@ -61,11 +61,12 @@ export async function POST(request: NextRequest) {
     const uint8Array = new Uint8Array(arrayBuffer);
 
     // Upload to Supabase storage
+    // Cache for 1 year - images are immutable (unique filenames)
     const { error } = await supabase.storage
       .from('user_uploads')
       .upload(fileName, uint8Array, {
         contentType: file.type,
-        cacheControl: '3600',
+        cacheControl: '31536000',
         upsert: false
       });
 

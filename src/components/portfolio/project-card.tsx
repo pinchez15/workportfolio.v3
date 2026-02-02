@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight, X, Calendar, Building } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { renderFormattedText } from "@/lib/formatting"
+import { ImageCarousel } from "./image-carousel"
 
 interface ProjectCardProps {
   project: {
@@ -36,14 +37,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
-  }
-
-  const nextExpandedImage = () => {
-    setExpandedImageIndex((prev) => (prev + 1) % images.length)
-  }
-
-  const prevExpandedImage = () => {
-    setExpandedImageIndex((prev) => (prev - 1 + images.length) % images.length)
   }
 
   const formatDate = (dateString: string) => {
@@ -160,40 +153,14 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </DialogHeader>
           
           <div className="space-y-6">
-            {/* Expanded Image Carousel */}
+            {/* Expanded Image Carousel - optimized with preloading */}
             {hasImages && (
-              <div className="relative h-96 bg-gray-100 rounded-lg overflow-hidden">
-                <Image
-                  src={images[expandedImageIndex]}
-                  alt={`${project.title} - Image ${expandedImageIndex + 1}`}
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 768px) 100vw, 75vw"
-                />
-                
-                {/* Navigation Arrows */}
-                {images.length > 1 && (
-                  <>
-                    <button
-                      onClick={prevExpandedImage}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
-                    >
-                      <ChevronLeft className="h-6 w-6" />
-                    </button>
-                    <button
-                      onClick={nextExpandedImage}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
-                    >
-                      <ChevronRight className="h-6 w-6" />
-                    </button>
-                    
-                    {/* Image Counter */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                      {expandedImageIndex + 1} / {images.length}
-                    </div>
-                  </>
-                )}
-              </div>
+              <ImageCarousel
+                images={images}
+                alt={project.title}
+                initialIndex={expandedImageIndex}
+                onIndexChange={setExpandedImageIndex}
+              />
             )}
 
             {/* Project Details */}
