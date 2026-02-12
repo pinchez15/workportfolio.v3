@@ -54,19 +54,27 @@ export default async function HomePage() {
     const supabase = createClient(supabaseUrl, supabaseKey);
     
     console.log('📋 Checking if user exists in Supabase for userId:', userId);
-    
+
     const { data: existingUser, error } = await supabase
       .from('users')
-      .select('id')
+      .select('id, username, name')
       .eq('id', userId)
       .single();
-    
+
     console.log('📊 Database check result:', { existingUser, error });
-    
+
     if (existingUser) {
-      // User exists in database, redirect to their portfolio
-      console.log(`✅ User exists - redirecting to portfolio: /${username}`);
-      redirect(`/${username}`);
+      // User exists in database - check if they've completed onboarding
+      if (!existingUser.name) {
+        // User was created by webhook but hasn't filled in their profile yet
+        console.log('🆕 User exists but has no name - redirecting to onboarding');
+        redirect('/welcome-demo');
+      }
+      // User has completed onboarding, redirect to their portfolio
+      // Use the username from the database to ensure consistency
+      const portfolioSlug = existingUser.username || username;
+      console.log(`✅ User exists with profile - redirecting to portfolio: /${portfolioSlug}`);
+      redirect(`/${portfolioSlug}`);
     } else {
       // User doesn't exist in database, redirect to welcome page
       console.log('🆕 User not found in database - redirecting to welcome');
@@ -199,7 +207,7 @@ export default async function HomePage() {
                         </Badge>
                       </div>
                     </div>
-                    
+
                     {/* Portfolio Footer Info */}
                     <div className="p-6 border-t border-gray-100">
                       <div className="flex items-center justify-between">

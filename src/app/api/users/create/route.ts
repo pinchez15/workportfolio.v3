@@ -37,13 +37,18 @@ export async function POST() {
     // Check if user already exists
     const { data: existingUser } = await supabase
       .from('users')
-      .select('id')
+      .select('id, username')
       .eq('id', userId)
       .single();
 
     if (existingUser) {
-      console.log('✅ User already exists in database');
-      return NextResponse.json({ message: 'User already exists', created: false });
+      console.log('✅ User already exists in database, username:', existingUser.username);
+      return NextResponse.json({
+        message: 'User already exists',
+        created: false,
+        username: existingUser.username,
+        user: existingUser
+      });
     }
 
     // Generate username using consistent logic
@@ -68,16 +73,16 @@ export async function POST() {
       portfolio_url: `https://workportfolio.io/${username}`,
     };
     
-    console.log('📝 Inserting user record via fallback API:', userRecord);
+    console.log('📝 Upserting user record via fallback API:', userRecord);
 
-    // Insert user into database
+    // Upsert user into database (handles race conditions with webhook gracefully)
     const { data, error } = await supabase
       .from('users')
-      .insert(userRecord)
+      .upsert(userRecord, { onConflict: 'id', ignoreDuplicates: true })
       .select();
 
     if (error) {
-      console.error('❌ Database insert error:', error);
+      console.error('❌ Database upsert error:', error);
       return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
     }
 

@@ -44,11 +44,13 @@ export async function POST(request: NextRequest) {
     // Handle user.created event
     if (event.type === 'user.created') {
       console.log('🆕 Processing user.created event for:', event.data.id);
-      
-      // Create user in database (don't await to avoid blocking webhook response)
-      createUserInDatabase(event.data).catch(error => {
+
+      try {
+        await createUserInDatabase(event.data);
+      } catch (error) {
         console.error('❌ User creation failed:', error);
-      });
+        // Still return 200 - the fallback API in welcome-demo will handle creation
+      }
     } else {
       console.log('⏭️ Ignoring event type:', event.type);
     }
@@ -106,15 +108,15 @@ async function createUserInDatabase(userData: {
     
     console.log('📝 Inserting user record:', userRecord);
 
-    // Insert user into database
+    // Upsert user into database (handles race conditions with fallback API gracefully)
     const { data, error } = await supabase
       .from('users')
-      .insert(userRecord)
+      .upsert(userRecord, { onConflict: 'id', ignoreDuplicates: true })
       .select();
 
     if (error) {
-      console.error('❌ Database insert error:', error);
-      throw new Error(`Database insert failed: ${error.message}`);
+      console.error('❌ Database upsert error:', error);
+      throw new Error(`Database upsert failed: ${error.message}`);
     }
 
     console.log('✅ User created successfully in database:', data);
