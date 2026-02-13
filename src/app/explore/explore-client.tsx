@@ -80,6 +80,7 @@ function matchesCategory(user: ExploreUser, category: string): boolean {
 export function ExploreClient({ users, isSignedIn }: ExploreClientProps) {
   const [activeCategory, setActiveCategory] = useState("All")
   const [searchQuery, setSearchQuery] = useState("")
+  const [availableOnly, setAvailableOnly] = useState(false)
 
   const filteredUsers = useMemo(() => {
     let result = users
@@ -87,6 +88,11 @@ export function ExploreClient({ users, isSignedIn }: ExploreClientProps) {
     // Category filter
     if (activeCategory !== "All") {
       result = result.filter((u) => matchesCategory(u, activeCategory))
+    }
+
+    // Available for hire filter
+    if (availableOnly) {
+      result = result.filter((u) => u.available_for_hire === true)
     }
 
     // Search filter
@@ -101,7 +107,7 @@ export function ExploreClient({ users, isSignedIn }: ExploreClientProps) {
     }
 
     return result
-  }, [users, activeCategory, searchQuery])
+  }, [users, activeCategory, searchQuery, availableOnly])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -167,6 +173,16 @@ export function ExploreClient({ users, isSignedIn }: ExploreClientProps) {
               {cat}
             </button>
           ))}
+          <button
+            onClick={() => setAvailableOnly((v) => !v)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+              availableOnly
+                ? "bg-green-600 text-white"
+                : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+            }`}
+          >
+            Available for hire
+          </button>
         </div>
 
         {/* Search */}
@@ -254,7 +270,7 @@ export function ExploreClient({ users, isSignedIn }: ExploreClientProps) {
                       {user.available_for_hire && (
                         <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
                           <Briefcase className="w-3 h-3 mr-1" />
-                          Hiring
+                          Available
                         </Badge>
                       )}
                     </div>
