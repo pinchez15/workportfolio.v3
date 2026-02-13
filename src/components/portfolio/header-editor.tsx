@@ -151,16 +151,8 @@ export function HeaderEditor({ user, onUpdate }: HeaderEditorProps) {
           open={isAvatarBuilderOpen}
           onOpenChange={setIsAvatarBuilderOpen}
           userId={clerkUser?.id || ""}
-          onAvatarSaved={async (publicUrl) => {
+          onAvatarSaved={(publicUrl) => {
             setFormData((prev) => ({ ...prev, avatar_url: publicUrl }))
-            const { error } = await supabase
-              .from("users")
-              .update({ avatar_url: publicUrl })
-              .eq("id", clerkUser!.id)
-            if (error) {
-              toast.error("Failed to save avatar")
-              return
-            }
             onUpdate({ ...user, avatar_url: publicUrl })
             toast.success("Avatar updated successfully!")
           }}

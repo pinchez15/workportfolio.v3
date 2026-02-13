@@ -10,7 +10,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { createClient } from "@/lib/supabase/client"
 import { svgToPng } from "./avatar-utils"
 import { AvatarBuilder } from "./avatar-builder"
 
@@ -25,7 +24,6 @@ export function AvatarBuilderDialog({
   open,
   onOpenChange,
   onAvatarSaved,
-  userId,
 }: AvatarBuilderDialogProps) {
   const [isSaving, setIsSaving] = useState(false)
   const svgRef = useRef<string>("")
@@ -35,26 +33,36 @@ export function AvatarBuilderDialog({
   }, [])
 
   const handleSave = async () => {
-    if (!svgRef.current || !userId) return
+    if (!svgRef.current) return
 
     setIsSaving(true)
     try {
+      // Convert SVG to PNG
       const blob = await svgToPng(svgRef.current, 400)
       const file = new File([blob], "avatar.png", { type: "image/png" })
 
-      const supabase = createClient()
-      const fileName = `${userId}-${Date.now()}.png`
-      const filePath = `avatars/${fileName}`
+      // Upload via API route (uses service role key, bypasses RLS)
+      const formData = new FormData()
+      formData.append("file", file)
 
-      const { error: uploadError } = await supabase.storage
-        .from("user_uploads")
-        .upload(filePath, file)
+      const uploadRes = await fetch("/api/upload/images", {
+        method: "POST",
+        body: formData,
+      })
 
-      if (uploadError) throw uploadError
+      if (!uploadRes.ok) throw new Error("Upload failed")
 
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("user_uploads").getPublicUrl(filePath)
+      const { file: uploaded } = await uploadRes.json()
+      const publicUrl = uploaded.url as string
+
+      // Update avatar_url via API route
+      const updateRes = await fetch("/api/users/update", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar_url: publicUrl }),
+      })
+
+      if (!updateRes.ok) throw new Error("Failed to update profile")
 
       onAvatarSaved(publicUrl)
       onOpenChange(false)

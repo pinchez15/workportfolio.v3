@@ -11,7 +11,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { name, title, bio, calendly_url, contact_email, available_for_hire } = body;
+    const { name, title, bio, calendly_url, contact_email, available_for_hire, avatar_url } = body;
 
     // Create Supabase client
     const supabaseUrl = process.env.SUPABASE_URL;
@@ -32,6 +32,7 @@ export async function PUT(request: Request) {
     if (calendly_url !== undefined) updateData.calendly_url = calendly_url;
     if (contact_email !== undefined) updateData.contact_email = contact_email;
     if (available_for_hire !== undefined) updateData.available_for_hire = available_for_hire;
+    if (avatar_url !== undefined) updateData.avatar_url = avatar_url;
 
     // Update user in database
     const { data, error } = await supabase

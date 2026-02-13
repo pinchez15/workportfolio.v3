@@ -30,7 +30,6 @@ import type { User, Project, Link as DatabaseLink } from "@/types/database"
 import { getSkillSuggestions } from "@/lib/skills"
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
 import { AvatarBuilderDialog } from "@/components/avatar-builder/avatar-builder-dialog"
-import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 
 interface DashboardClientProps {
@@ -552,16 +551,7 @@ export function DashboardClient({
         open={isAvatarBuilderOpen}
         onOpenChange={setIsAvatarBuilderOpen}
         userId={user.id}
-        onAvatarSaved={async (publicUrl) => {
-          const supabase = createClient()
-          const { error } = await supabase
-            .from("users")
-            .update({ avatar_url: publicUrl })
-            .eq("id", user.id)
-          if (error) {
-            toast.error("Failed to save avatar")
-            return
-          }
+        onAvatarSaved={(publicUrl) => {
           setLocalUser((prev) => ({ ...prev, avatar_url: publicUrl }))
           toast.success("Avatar updated!")
         }}

@@ -89,7 +89,7 @@ export const STYLE_CONFIGS: Record<AvatarStyle, StyleConfig> = {
       {
         key: "glasses",
         label: "Glasses",
-        type: "toggle",
+        type: "variant",
         variants: ["variant01", "variant02", "variant03", "variant04", "variant05"],
         probabilityKey: "glassesProbability",
       },
@@ -141,14 +141,14 @@ export const STYLE_CONFIGS: Record<AvatarStyle, StyleConfig> = {
       {
         key: "glasses",
         label: "Glasses",
-        type: "toggle",
+        type: "variant",
         variants: Array.from({ length: 11 }, (_, i) => `variant${String(i + 1).padStart(2, "0")}`),
         probabilityKey: "glassesProbability",
       },
       {
         key: "beard",
-        label: "Beard",
-        type: "toggle",
+        label: "Facial Hair",
+        type: "variant",
         variants: Array.from({ length: 12 }, (_, i) => `variant${String(i + 1).padStart(2, "0")}`),
         probabilityKey: "beardProbability",
       },
