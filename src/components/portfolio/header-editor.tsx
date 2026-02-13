@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useUser } from "@clerk/nextjs"
 import Image from "next/image"
-import { Camera } from "lucide-react"
+import { Camera, Palette } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { User } from "@/types/database"
+import { AvatarBuilderDialog } from "@/components/avatar-builder/avatar-builder-dialog"
 
 interface HeaderEditorProps {
   user: User
@@ -20,6 +21,7 @@ interface HeaderEditorProps {
 export function HeaderEditor({ user, onUpdate }: HeaderEditorProps) {
   const { user: clerkUser } = useUser()
   const [isLoading, setIsLoading] = useState(false)
+  const [isAvatarBuilderOpen, setIsAvatarBuilderOpen] = useState(false)
   const [formData, setFormData] = useState({
     name: user.name || "",
     title: user.title || "",
@@ -128,13 +130,41 @@ export function HeaderEditor({ user, onUpdate }: HeaderEditorProps) {
           </div>
           <div className="flex-1">
             <p className="text-sm text-gray-600 mb-2">
-              {clerkUser?.imageUrl ? 
+              {clerkUser?.imageUrl ?
                 "Your avatar is imported from LinkedIn. Upload a higher quality image for better results." :
-                "Upload a professional photo to make your portfolio stand out."
+                "Upload a professional photo or create an illustrated avatar."
               }
             </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAvatarBuilderOpen(true)}
+              className="text-xs bg-transparent"
+            >
+              <Palette className="h-3 w-3 mr-1" />
+              Create Avatar
+            </Button>
           </div>
         </div>
+
+        <AvatarBuilderDialog
+          open={isAvatarBuilderOpen}
+          onOpenChange={setIsAvatarBuilderOpen}
+          userId={clerkUser?.id || ""}
+          onAvatarSaved={async (publicUrl) => {
+            setFormData((prev) => ({ ...prev, avatar_url: publicUrl }))
+            const { error } = await supabase
+              .from("users")
+              .update({ avatar_url: publicUrl })
+              .eq("id", clerkUser!.id)
+            if (error) {
+              toast.error("Failed to save avatar")
+              return
+            }
+            onUpdate({ ...user, avatar_url: publicUrl })
+            toast.success("Avatar updated successfully!")
+          }}
+        />
 
         {/* Form Fields */}
         <div className="grid gap-4">

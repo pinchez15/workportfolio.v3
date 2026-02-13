@@ -18,6 +18,7 @@ import {
   Link2,
   Lightbulb,
   CalendarDays,
+  Palette,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -28,6 +29,9 @@ import { Textarea } from "@/components/ui/textarea"
 import type { User, Project, Link as DatabaseLink } from "@/types/database"
 import { getSkillSuggestions } from "@/lib/skills"
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
+import { AvatarBuilderDialog } from "@/components/avatar-builder/avatar-builder-dialog"
+import { createClient } from "@/lib/supabase/client"
+import { toast } from "sonner"
 
 interface DashboardClientProps {
   user: User
@@ -47,6 +51,10 @@ export function DashboardClient({
   skills,
   completeness,
 }: DashboardClientProps) {
+  // Avatar builder state
+  const [isAvatarBuilderOpen, setIsAvatarBuilderOpen] = useState(false)
+  const [localUser, setLocalUser] = useState(user)
+
   // Add Project dialog state
   const [isAddingProject, setIsAddingProject] = useState(false)
   const [projectForm, setProjectForm] = useState({
@@ -296,21 +304,30 @@ export function DashboardClient({
           <Card className="bg-white shadow-sm border-0 rounded-xl">
             <CardContent className="p-5">
               <div className="flex items-start space-x-4">
-                {user.avatar_url ? (
-                  <img
-                    src={user.avatar_url}
-                    alt={user.name || "Avatar"}
-                    className="w-14 h-14 rounded-full object-cover flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
-                    {(user.name || user.username)
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .toUpperCase()}
-                  </div>
-                )}
+                <div className="relative flex-shrink-0">
+                  {localUser.avatar_url ? (
+                    <img
+                      src={localUser.avatar_url}
+                      alt={localUser.name || "Avatar"}
+                      className="w-14 h-14 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg font-bold">
+                      {(localUser.name || localUser.username)
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()}
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setIsAvatarBuilderOpen(true)}
+                    className="absolute -bottom-1 -right-1 bg-blue-600 text-white p-1 rounded-full hover:bg-blue-700 transition-colors"
+                    title="Create Avatar"
+                  >
+                    <Palette className="h-3 w-3" />
+                  </button>
+                </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="text-lg font-bold text-gray-900 truncate">
                     {user.name}
@@ -529,6 +546,26 @@ export function DashboardClient({
           </CardContent>
         </Card>
       </main>
+
+      {/* Avatar Builder Dialog */}
+      <AvatarBuilderDialog
+        open={isAvatarBuilderOpen}
+        onOpenChange={setIsAvatarBuilderOpen}
+        userId={user.id}
+        onAvatarSaved={async (publicUrl) => {
+          const supabase = createClient()
+          const { error } = await supabase
+            .from("users")
+            .update({ avatar_url: publicUrl })
+            .eq("id", user.id)
+          if (error) {
+            toast.error("Failed to save avatar")
+            return
+          }
+          setLocalUser((prev) => ({ ...prev, avatar_url: publicUrl }))
+          toast.success("Avatar updated!")
+        }}
+      />
 
       {/* Add Project Dialog */}
       <Dialog open={isAddingProject} onOpenChange={closeProjectModal}>
