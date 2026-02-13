@@ -78,6 +78,7 @@ export default async function HomePage() {
     available_for_hire?: boolean
     skills: string[]
     project_count: number
+    featured_image?: string
   }[] = []
 
   if (supabaseUrl && supabaseKey) {
@@ -93,12 +94,13 @@ export default async function HomePage() {
       const userIds = users.map((u) => u.id)
       const { data: projects } = await supabase
         .from("projects")
-        .select("user_id, skills, visible")
+        .select("user_id, skills, visible, image_path, image_paths, featured")
         .in("user_id", userIds)
         .eq("visible", true)
 
       const projectCountMap: Record<string, number> = {}
       const skillsMap: Record<string, Set<string>> = {}
+      const featuredImageMap: Record<string, string> = {}
 
       for (const project of projects || []) {
         projectCountMap[project.user_id] = (projectCountMap[project.user_id] || 0) + 1
@@ -109,6 +111,11 @@ export default async function HomePage() {
           for (const skill of project.skills) {
             skillsMap[project.user_id].add(skill)
           }
+        }
+        // Pick the first available project image (prefer featured projects)
+        if (!featuredImageMap[project.user_id]) {
+          const img = project.image_paths?.[0] || project.image_path
+          if (img) featuredImageMap[project.user_id] = img
         }
       }
 
@@ -124,6 +131,7 @@ export default async function HomePage() {
           available_for_hire: u.available_for_hire || false,
           skills: Array.from(skillsMap[u.id] || []),
           project_count: projectCountMap[u.id] || 0,
+          featured_image: featuredImageMap[u.id] || undefined,
         }))
     }
   }
@@ -249,7 +257,16 @@ export default async function HomePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {exploreUsers.map((user) => (
                 <Link key={user.id} href={`/${user.username}`}>
-                  <Card className="bg-white shadow-sm border-0 rounded-xl hover:shadow-md transition-all h-full cursor-pointer">
+                  <Card className="bg-white shadow-sm border-0 rounded-xl hover:shadow-md transition-all h-full cursor-pointer overflow-hidden">
+                    {user.featured_image && (
+                      <div className="h-32 bg-gray-100 overflow-hidden">
+                        <img
+                          src={user.featured_image}
+                          alt={`${user.name}'s work`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
                     <CardContent className="p-5">
                       <div className="flex items-start space-x-3 mb-3">
                         {user.avatar_url ? (

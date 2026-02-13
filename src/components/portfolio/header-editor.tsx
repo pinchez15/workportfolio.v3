@@ -37,34 +37,29 @@ export function HeaderEditor({ user, onUpdate }: HeaderEditorProps) {
 
     setIsLoading(true)
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${clerkUser.id}-${Date.now()}.${fileExt}`
-      const filePath = `avatars/${fileName}`
+      const formDataUpload = new FormData()
+      formDataUpload.append("file", file)
 
-      const { error: uploadError } = await supabase.storage
-        .from('user_uploads')
-        .upload(filePath, file)
+      const uploadRes = await fetch("/api/upload/images", {
+        method: "POST",
+        body: formDataUpload,
+      })
+      if (!uploadRes.ok) throw new Error("Upload failed")
 
-      if (uploadError) throw uploadError
+      const { file: uploaded } = await uploadRes.json()
+      const publicUrl = uploaded.url as string
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('user_uploads')
-        .getPublicUrl(filePath)
+      const updateRes = await fetch("/api/users/update", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar_url: publicUrl }),
+      })
+      if (!updateRes.ok) throw new Error("Update failed")
 
       setFormData(prev => ({ ...prev, avatar_url: publicUrl }))
-      
-      // Update database
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({ avatar_url: publicUrl })
-        .eq('id', clerkUser.id)
-
-      if (updateError) throw updateError
-
       onUpdate({ ...user, avatar_url: publicUrl })
       toast.success("Avatar updated successfully!")
     } catch {
-              // Error uploading avatar
       toast.error("Failed to upload avatar")
     } finally {
       setIsLoading(false)
@@ -130,20 +125,39 @@ export function HeaderEditor({ user, onUpdate }: HeaderEditorProps) {
           </div>
           <div className="flex-1">
             <p className="text-sm text-gray-600 mb-2">
-              {clerkUser?.imageUrl ?
-                "Your avatar is imported from LinkedIn. Upload a higher quality image for better results." :
-                "Upload a professional photo or create an illustrated avatar."
-              }
+              Upload a photo or create an illustrated avatar.
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsAvatarBuilderOpen(true)}
-              className="text-xs bg-transparent"
-            >
-              <Palette className="h-3 w-3 mr-1" />
-              Create Avatar
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs bg-transparent"
+                asChild
+              >
+                <label className="cursor-pointer">
+                  <Camera className="h-3 w-3 mr-1" />
+                  Upload Photo
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleAvatarUpload(file)
+                    }}
+                  />
+                </label>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsAvatarBuilderOpen(true)}
+                className="text-xs bg-transparent"
+              >
+                <Palette className="h-3 w-3 mr-1" />
+                Create Avatar
+              </Button>
+            </div>
           </div>
         </div>
 

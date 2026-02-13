@@ -17,6 +17,9 @@ import { renderFormattedText } from "@/lib/formatting"
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
 import { CalendlyComponent } from "@/components/portfolio/calendly-component"
 import { ImageCarousel } from "@/components/portfolio/image-carousel"
+import { AvatarBuilderDialog } from "@/components/avatar-builder/avatar-builder-dialog"
+import { Camera, Palette } from "lucide-react"
+import { toast } from "sonner"
 
 interface PortfolioClientProps {
   user: User
@@ -55,6 +58,7 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
   // Edit mode states
   const [isEditMode, setIsEditMode] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isAvatarBuilderOpen, setIsAvatarBuilderOpen] = useState(false)
 
   // Auto-open add project modal if coming from onboarding
   const [hasHandledAddProject, setHasHandledAddProject] = useState(false)
@@ -802,11 +806,18 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
             </Link>
             <div className="flex items-center space-x-3">
               {isSignedIn && !isEditMode && (
-                <Link href="/explore" className="hidden sm:block">
-                  <Button variant="ghost" size="sm" className="text-sm text-gray-600 hover:text-gray-900">
-                    Explore
-                  </Button>
-                </Link>
+                <>
+                  <Link href="/dashboard" className="hidden sm:block">
+                    <Button variant="ghost" size="sm" className="text-sm text-gray-600 hover:text-gray-900">
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Link href="/explore" className="hidden sm:block">
+                    <Button variant="ghost" size="sm" className="text-sm text-gray-600 hover:text-gray-900">
+                      Explore
+                    </Button>
+                  </Link>
+                </>
               )}
               {isOwner && !isEditMode && (
                 <Button
@@ -868,20 +879,68 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
         <div className="bg-white rounded-2xl p-6 sm:p-8 mb-8 shadow-sm">
           <div className="flex items-start space-x-4">
             {/* Avatar */}
-            {(isEditMode ? editableUser.avatar_url : user.avatar_url) ? (
-              <img
-                src={isEditMode ? editableUser.avatar_url : user.avatar_url}
-                alt={`${isEditMode ? editableUser.name : user.name} avatar`}
-                      className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+            <div className="relative flex-shrink-0">
+              {(isEditMode ? editableUser.avatar_url : user.avatar_url) ? (
+                <img
+                  src={isEditMode ? editableUser.avatar_url : user.avatar_url}
+                  alt={`${isEditMode ? editableUser.name : user.name} avatar`}
+                  className="w-16 h-16 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold">
+                  {((isEditMode ? editableUser.name : user.name) || user.username)
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </div>
+              )}
+              {isEditMode && isOwner && (
+                <div className="absolute -bottom-1 -right-1 flex gap-0.5">
+                  <label className="bg-blue-600 text-white p-1 rounded-full cursor-pointer hover:bg-blue-700" title="Upload photo">
+                    <Camera className="h-3 w-3" />
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        const formData = new FormData()
+                        formData.append("file", file)
+                        const res = await fetch("/api/upload/images", { method: "POST", body: formData })
+                        if (!res.ok) { toast.error("Failed to upload"); return }
+                        const { file: uploaded } = await res.json()
+                        const url = uploaded.url as string
+                        await fetch("/api/users/update", {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ avatar_url: url }),
+                        })
+                        setEditableUser((prev) => ({ ...prev, avatar_url: url }))
+                        toast.success("Photo updated!")
+                      }}
                     />
-            ) : (
-                    <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
-                {((isEditMode ? editableUser.name : user.name) || user.username)
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-                    </div>
-            )}
+                  </label>
+                  <button
+                    onClick={() => setIsAvatarBuilderOpen(true)}
+                    className="bg-blue-600 text-white p-1 rounded-full hover:bg-blue-700"
+                    title="Create illustrated avatar"
+                  >
+                    <Palette className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <AvatarBuilderDialog
+              open={isAvatarBuilderOpen}
+              onOpenChange={setIsAvatarBuilderOpen}
+              userId={clerkUser?.id || ""}
+              onAvatarSaved={(publicUrl) => {
+                setEditableUser((prev) => ({ ...prev, avatar_url: publicUrl }))
+                toast.success("Avatar updated!")
+              }}
+            />
 
             {/* Content */}
             <div className="flex-1 min-w-0">
