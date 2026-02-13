@@ -18,8 +18,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WorkPortfolio.io - Professional Portfolio Builder",
-  description: "Create and share your professional portfolio with ease",
+  metadataBase: new URL("https://www.workportfolio.io"),
+  title: {
+    default: "WorkPortfolio.io - Professional Portfolio Builder",
+    template: "%s | WorkPortfolio.io",
+  },
+  description: "Create and share your professional portfolio with ease. Show your work, not just your resume.",
+  openGraph: {
+    siteName: "WorkPortfolio.io",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
