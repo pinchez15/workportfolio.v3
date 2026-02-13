@@ -119,6 +119,14 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     }
   }, [isOwner, hasHandledAddProject, searchParams, user.username])
 
+  // Auto-enter edit mode when ?edit=true is in the URL
+  useEffect(() => {
+    if (isOwner && searchParams.get('edit') === 'true') {
+      setIsEditMode(true)
+      window.history.replaceState({}, '', `/${user.username}`)
+    }
+  }, [isOwner, searchParams, user.username])
+
   // Fetch contact email (hidden from crawlers - only fetched on user action)
   const handleRevealEmail = async () => {
     if (revealedEmail || isLoadingEmail) return
@@ -793,6 +801,13 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
               WorkPortfolio
             </Link>
             <div className="flex items-center space-x-3">
+              {isSignedIn && !isEditMode && (
+                <Link href="/explore" className="hidden sm:block">
+                  <Button variant="ghost" size="sm" className="text-sm text-gray-600 hover:text-gray-900">
+                    Explore
+                  </Button>
+                </Link>
+              )}
               {isOwner && !isEditMode && (
                 <Button
                   onClick={enterEditMode}

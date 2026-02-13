@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Upload, Star, Zap } from "lucide-react"
+import { ArrowRight, Check, Upload, Zap } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,32 +10,21 @@ import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@cl
 import { auth, currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { createClient } from "@supabase/supabase-js"
-import { generateUsername } from "@/lib/username"
 
 export default async function HomePage() {
   console.log('🏠 Homepage accessed at:', new Date().toISOString());
-  
-  // Check if user is authenticated and redirect to their portfolio
+
+  // Check if user is authenticated and redirect to dashboard
   const { userId } = await auth();
   console.log('🔐 Auth check - userId:', userId);
-  
+
   if (userId) {
     const user = await currentUser();
-    
+
     if (!user) {
-      // User is authenticated but we can't get user data, redirect to sign-in
       redirect('/sign-in');
     }
-    
-    // Generate username using consistent logic
-    const username = generateUsername({
-      first_name: user.firstName,
-      last_name: user.lastName,
-      username: user.username,
-      emailAddresses: user.emailAddresses,
-      id: userId
-    });
-    
+
     // Check if user exists in Supabase
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -70,11 +59,9 @@ export default async function HomePage() {
         console.log('🆕 User exists but has no name - redirecting to onboarding');
         redirect('/welcome-demo');
       }
-      // User has completed onboarding, redirect to their portfolio
-      // Use the username from the database to ensure consistency
-      const portfolioSlug = existingUser.username || username;
-      console.log(`✅ User exists with profile - redirecting to portfolio: /${portfolioSlug}`);
-      redirect(`/${portfolioSlug}`);
+      // User has completed onboarding, redirect to dashboard
+      console.log(`✅ User exists with profile - redirecting to dashboard`);
+      redirect(`/dashboard`);
     } else {
       // User doesn't exist in database, redirect to welcome page
       console.log('🆕 User not found in database - redirecting to welcome');
