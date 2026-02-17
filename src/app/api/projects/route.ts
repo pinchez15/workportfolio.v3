@@ -44,6 +44,48 @@ export async function POST(request: NextRequest) {
       return `${monthStr}-01` // Convert "2025-02" to "2025-02-01"
     }
 
+    // Auto-assign order_index based on start_date chronological position
+    let assignedOrderIndex = order_index;
+    if (assignedOrderIndex === undefined || assignedOrderIndex === null) {
+      // Fetch existing projects ordered by order_index
+      const { data: existingProjects } = await supabase
+        .from('projects')
+        .select('id, start_date, order_index')
+        .eq('user_id', userId)
+        .order('order_index', { ascending: true });
+
+      if (!existingProjects || existingProjects.length === 0) {
+        assignedOrderIndex = 0;
+      } else if (!start_date) {
+        // No start_date — insert at top (position 0), shift others down
+        assignedOrderIndex = 0;
+        const updates = existingProjects.map((p, i) =>
+          supabase.from('projects').update({ order_index: i + 1 }).eq('id', p.id)
+        );
+        await Promise.all(updates);
+      } else {
+        // Find correct chronological position (most recent first)
+        const newDate = `${start_date}-01`;
+        let insertAt = existingProjects.length; // default: end
+        for (let i = 0; i < existingProjects.length; i++) {
+          const projDate = existingProjects[i].start_date;
+          if (!projDate || projDate < newDate) {
+            insertAt = i;
+            break;
+          }
+        }
+        assignedOrderIndex = insertAt;
+        // Shift projects at and after insertAt down by 1
+        const toShift = existingProjects.slice(insertAt);
+        if (toShift.length > 0) {
+          const updates = toShift.map((p, i) =>
+            supabase.from('projects').update({ order_index: insertAt + i + 1 }).eq('id', p.id)
+          );
+          await Promise.all(updates);
+        }
+      }
+    }
+
     // Insert project into database
     const { data, error } = await supabase
       .from('projects')
@@ -61,7 +103,7 @@ export async function POST(request: NextRequest) {
         featured: featured || false,
         image_path: image_path || null,
         image_paths: image_paths || null,
-        order_index: order_index || 0 // Default to 0 if not provided
+        order_index: assignedOrderIndex
       })
       .select()
       .single();
@@ -198,6 +240,14 @@ export async function DELETE(request: NextRequest) {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Fetch project to get image paths before deleting
+    const { data: project } = await supabase
+      .from('projects')
+      .select('image_paths')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single();
+
     // Delete project from database
     const { error } = await supabase
       .from('projects')
@@ -210,7 +260,29 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to delete project' }, { status: 500 });
     }
 
-    return NextResponse.json({ 
+    // Clean up storage files
+    if (project?.image_paths && project.image_paths.length > 0) {
+      const storagePaths = project.image_paths
+        .map((url: string) => {
+          const marker = '/user_uploads/';
+          const idx = url.indexOf(marker);
+          return idx !== -1 ? url.substring(idx + marker.length) : null;
+        })
+        .filter((p: string | null): p is string => p !== null);
+
+      if (storagePaths.length > 0) {
+        const { error: storageError } = await supabase.storage
+          .from('user_uploads')
+          .remove(storagePaths);
+
+        if (storageError) {
+          console.warn('Failed to clean up storage files:', storageError);
+          // Don't fail the request — DB record is already deleted
+        }
+      }
+    }
+
+    return NextResponse.json({
       message: 'Project deleted successfully'
     });
 

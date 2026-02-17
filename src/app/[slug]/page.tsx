@@ -95,6 +95,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
     .eq("user_id", user.id)
     .eq("visible", true)
     .order("order_index", { ascending: true })
+    .order("start_date", { ascending: false, nullsFirst: false })
 
   if (projectsError) {
     console.error("Error fetching projects:", projectsError)

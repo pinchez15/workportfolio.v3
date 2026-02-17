@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ExternalLink, Github, Linkedin, Mail, Youtube, ArrowRight, ChevronLeft, ChevronRight, Edit, Save, Plus, X, Upload, FileImage, GripVertical, Briefcase, Loader2, Copy, Check } from "lucide-react"
+import { ExternalLink, Github, Linkedin, Mail, Youtube, ArrowRight, ChevronLeft, ChevronRight, Edit, Save, Plus, X, Upload, FileImage, GripVertical, Briefcase, Loader2, Copy, Check, ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -92,6 +92,8 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
   // Image upload states
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
+  const [removedExistingImages, setRemovedExistingImages] = useState<string[]>([])
+  const [existingImages, setExistingImages] = useState<string[]>([])
 
   // Skills search states
   const [skillsInput, setSkillsInput] = useState('')
@@ -237,6 +239,36 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
       console.error('Failed to save link order:', error);
       // Revert to original order on error
       setEditableLinks(links);
+    }
+  };
+
+  // Sort all projects by start_date (most recent first) and save new order
+  const sortProjectsByDate = async () => {
+    const sorted = [...editableProjects].sort((a, b) => {
+      if (!a.start_date && !b.start_date) return 0;
+      if (!a.start_date) return 1;  // nulls last
+      if (!b.start_date) return -1;
+      return b.start_date.localeCompare(a.start_date); // most recent first
+    });
+
+    const updated = sorted.map((p, i) => ({ ...p, order_index: i }));
+    setEditableProjects(updated);
+
+    try {
+      await Promise.all(
+        updated.map((project) =>
+          fetch('/api/projects', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: project.id, order_index: project.order_index }),
+          })
+        )
+      );
+      toast.success('Projects sorted by date');
+    } catch (error) {
+      console.error('Failed to save sorted order:', error);
+      setEditableProjects(projects);
+      toast.error('Failed to sort projects');
     }
   };
 
@@ -432,6 +464,8 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     })
     setEditingProject(null)
     setUploadedFiles([])
+    setExistingImages([])
+    setRemovedExistingImages([])
     setIsAddingProject(true)
   }
 
@@ -456,6 +490,8 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     })
     setEditingProject(project)
     setUploadedFiles([])
+    setExistingImages(project.image_paths || [])
+    setRemovedExistingImages([])
     setIsAddingProject(true)
   }
 
@@ -463,6 +499,13 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
     setIsAddingProject(false)
     setEditingProject(null)
     setUploadedFiles([])
+    setExistingImages([])
+    setRemovedExistingImages([])
+  }
+
+  const removeExistingImage = (url: string) => {
+    setRemovedExistingImages(prev => [...prev, url])
+    setExistingImages(prev => prev.filter(img => img !== url))
   }
 
   // Image upload handlers
@@ -493,7 +536,8 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
       return true
     })
     
-    setUploadedFiles(prev => [...prev, ...validFiles].slice(0, 5)) // Max 5 files
+    const maxNew = 5 - existingImages.length
+    setUploadedFiles(prev => [...prev, ...validFiles].slice(0, maxNew))
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -588,10 +632,14 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
         }
       }
 
+      // Merge existing images (minus removed) with newly uploaded images
+      const keptExisting = existingImages.filter(img => !removedExistingImages.includes(img))
+      const mergedImages = [...keptExisting, ...imagePaths].slice(0, 5)
+
       const projectData = {
         ...projectForm,
-        image_paths: imagePaths.length > 0 ? imagePaths : (editingProject?.image_paths || null),
-        image_path: imagePaths.length > 0 ? imagePaths[0] : (editingProject?.image_path || null)
+        image_paths: mergedImages.length > 0 ? mergedImages : null,
+        image_path: mergedImages[0] || null
       }
 
       if (editingProject) {
@@ -626,9 +674,13 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
         }
 
         const { project } = await response.json()
-        setEditableProjects(prev => [project, ...prev])
+        // Insert at the correct chronological position (matches server-assigned order_index)
+        setEditableProjects(prev => {
+          const updated = [...prev, project].sort((a, b) => a.order_index - b.order_index);
+          return updated;
+        })
       }
-      
+
       closeProjectModal()
     } catch (error) {
       console.error('Failed to save project:', error)
@@ -1107,15 +1159,28 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">My Projects</h2>
               {isEditMode && (
-                <Button
-                  onClick={openAddProject}
-                  size="sm"
-                  variant="outline"
-                  className="bg-transparent"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add
-                </Button>
+                <div className="flex items-center gap-2">
+                  {editableProjects.length > 1 && (
+                    <Button
+                      onClick={sortProjectsByDate}
+                      size="sm"
+                      variant="outline"
+                      className="bg-transparent"
+                    >
+                      <ArrowUpDown className="w-4 h-4 mr-1" />
+                      Sort by Date
+                    </Button>
+                  )}
+                  <Button
+                    onClick={openAddProject}
+                    size="sm"
+                    variant="outline"
+                    className="bg-transparent"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add
+                  </Button>
+                </div>
               )}
             </div>
             
@@ -1882,7 +1947,48 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Project Images</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Project Images
+                {(existingImages.length > 0 || uploadedFiles.length > 0) && (
+                  <span className="ml-2 text-xs font-normal text-gray-500">
+                    {existingImages.length > 0 && uploadedFiles.length > 0
+                      ? `${existingImages.length} existing + ${uploadedFiles.length} new (${existingImages.length + uploadedFiles.length}/5)`
+                      : `${existingImages.length + uploadedFiles.length}/5`
+                    }
+                  </span>
+                )}
+              </label>
+
+              {/* Existing image thumbnails */}
+              {existingImages.length > 0 && (
+                <div className="mb-3">
+                  <p className="text-xs text-gray-500 mb-2">Existing images (click X to remove)</p>
+                  <div className="grid grid-cols-5 gap-2">
+                    {existingImages.map((url, index) => (
+                      <div key={url} className="relative group">
+                        <img
+                          src={url}
+                          alt={`Existing image ${index + 1}`}
+                          className="w-full h-20 object-cover rounded border border-gray-200"
+                        />
+                        {index === 0 && uploadedFiles.length === 0 && (
+                          <span className="absolute bottom-0 left-0 right-0 bg-blue-600 text-white text-[10px] text-center py-0.5 rounded-b">
+                            Main
+                          </span>
+                        )}
+                        <button
+                          onClick={() => removeExistingImage(url)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {existingImages.length + uploadedFiles.length < 5 && (
               <div
                 className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
                   isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
@@ -1910,10 +2016,11 @@ export function PortfolioClient({ user, portfolio, projects, links, allSkills }:
                     Upload screenshots, mockups, or project visuals
                   </p>
                   <p className="text-xs text-gray-400">
-                    Supports: JPEG, PNG, GIF, WebP, PDF • Max 10MB per file • Up to 5 files
+                    Supports: JPEG, PNG, GIF, WebP, PDF • Max 10MB per file • Up to {5 - existingImages.length} more
                   </p>
                 </div>
               </div>
+              )}
               
               {uploadedFiles.length > 0 && (
                 <div className="mt-3">
